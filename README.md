@@ -13,6 +13,15 @@ The base keyboard VJ engine is heavily inspired and build upon the works of
 - George Gally Radarboy [github.com/GeorgeGally/rbvj/](https://github.com/GeorgeGally/rbvj/)
 - Salil Parekh [github.com/burnedsap/p5-vj](https://github.com/burnedsap/p5-vj)
 
-------
+## INSTRUCTIONS
+
+### Install
+```
+npm i
+```
+### Run
+```
+npx vite
+```
 
 _work in progress, more credits && work to come, stay tuned [@fupete](https://twitter.com/fupete)_
