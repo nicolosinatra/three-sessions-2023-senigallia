@@ -38,6 +38,10 @@ const changeSet = (set) => {
 	changeSketch(0)
 }
 const loadSketch = async (sketchName) => {
+	if (myThree) {
+		myThree.dispose()
+		myThree = {}
+	}
 	canvas3D.replaceChildren()
 	myThree = await import(`/${sketchName}`)
 	myThree.sketch(canvas3D, THREE) // LET'S ROCK

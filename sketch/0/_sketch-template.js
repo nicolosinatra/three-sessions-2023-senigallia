@@ -1,15 +1,10 @@
-// Rotating cube + Post processing Glitch
-
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
-import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js'
-
 let renderer
-let geometry
+let scene
 let material
+let geometry
 let animation
 let onWindowResize
 
@@ -31,7 +26,7 @@ export function sketch(canvas3D, THREE) {
     camera.position.z = 5
 
     // WINDOW RESIZE
-    onWindowResize = () => {
+    const onWindowResize = () => {
         camera.aspect = window.innerWidth / window.innerHeight
         camera.updateProjectionMatrix()
         renderer.setSize(window.innerWidth, window.innerHeight)
@@ -39,33 +34,22 @@ export function sketch(canvas3D, THREE) {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement)
 
     // SCENE
-    const scene = new THREE.Scene()
-    geometry = new THREE.BoxGeometry(1, 1, 1)
-    material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-    let cube = new THREE.Mesh(geometry, material)
-    scene.add(cube)
-
-    // POST-PROCESSING
-    const composer = new EffectComposer(renderer)
-    const renderPass = new RenderPass(scene, camera)
-    composer.addPass(renderPass)
-    const glitchPass = new GlitchPass()
-    composer.addPass(glitchPass)
+    scene = new THREE.Scene()
+    material = new THREE.MeshPhongMaterial({ specular: 0x000000, shininess: 1 })
+    // ...
+    // scene.add(X)
 
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
 
         // ANIMATION
-        cube.rotation.x += 0.01
-        cube.rotation.y += 0.01
         // ...
 
         renderer.render(scene, camera) // RENDER
-        composer.render() // POST-PROCESSING
         stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
@@ -76,7 +60,7 @@ export function sketch(canvas3D, THREE) {
 export function dispose() {
     cancelAnimationFrame(animation)
     renderer.dispose()
-    geometry.dispose()
-    material.dispose()
+    // geometry.dispose()
+    // material.dispose()
     window.removeEventListener('resize', onWindowResize)
 }
