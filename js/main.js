@@ -2,15 +2,10 @@ import * as THREE from 'three'
 
 let myThree
 
-const ctx = createCanvas('canvas1')
-const ctx2 = createCanvas('canvas2')
-const ctx3 = createCanvas('canvas3')
-
 const artFolder = "sketch"
-let fileref
-let current_file = 0;
-let current_set = 0;
-let current_bank = 0;
+let current_file = 0
+let current_set = 0
+let current_bank = 0
 
 function setup() {
   changeFile(0)
@@ -33,18 +28,10 @@ function changeSet(set) {
   changeFile(0)
 }
 
-
 function changeBank(bank) {
   current_bank = bank
   console.log("changeBank: " + current_bank)
   changeFile(0)
-}
-
-function reset() {
-  ctx.clearRect(0, 0, w, h)
-  ctx2.clearRect(0, 0, w, h)
-  ctx3.clearRect(0, 0, w, h)
-  ctx.lineCap = "butt"
 }
 
 async function loadJS(filename) {
@@ -53,17 +40,7 @@ async function loadJS(filename) {
   myThree.stage(THREE)
 }
 
-function init() {
-  // window.addEventListener('keydown', function (e) {
-  //   if (typeof onKeyDown == 'function') onKeyDown(e)
-  // })
-  // window.addEventListener('keyup', function (e) {
-  //   if (typeof onKeyUp == 'function') onKeyUp(e)
-  // })
-  if (typeof window.setup == 'function') window.setup()
-}
-
-window.addEventListener('load', init)
+window.addEventListener('load', setup)
 
 // KEYPRESS
 
