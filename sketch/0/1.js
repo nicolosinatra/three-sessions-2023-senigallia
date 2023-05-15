@@ -9,7 +9,7 @@ let material
 let animation
 let onWindowResize
 
-export function sketch(canvas3D, THREE) {
+export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)

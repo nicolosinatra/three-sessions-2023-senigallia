@@ -1,4 +1,9 @@
+// @fupete
+
+import "./init"
+
 import * as THREE from 'three'
+global.THREE = THREE // global THREE
 
 let myThree
 const artFolder = "sketch"
@@ -16,12 +21,13 @@ const init = () => {
 	// ...
 }
 window.addEventListener('load', init)
-const canvas3D = document.getElementById("canvas3D")
+global.canvas3D = document.getElementById("canvas3D") // global canvas3D
 
-// CHANGE SKETCH
-const reset = () => {
-	console.log('reset if need, init')
-	// ...
+// CHANGE SET & SKETCH
+const changeSet = (set) => {
+	current_set = set
+	// console.log("changeBank: " + current_set)
+	changeSketch(0)
 }
 const changeSketch = (sketch) => {
 	reset()
@@ -32,19 +38,18 @@ const changeSketch = (sketch) => {
 	// console.log("changeSketch: " + sketchName)
 	document.location.hash = loc
 }
-const changeSet = (set) => {
-	current_set = set
-	// console.log("changeBank: " + current_set)
-	changeSketch(0)
+const reset = () => {
+	console.log('reset if need, init')
+	// ...
 }
 const loadSketch = async (sketchName) => {
-	if (myThree) {
+	if (myThree?.dispose()) {
 		myThree.dispose()
 		myThree = {}
 	}
 	canvas3D.replaceChildren()
 	myThree = await import(`/${sketchName}`)
-	myThree.sketch(canvas3D, THREE) // LET'S ROCK
+	myThree.sketch() // LET'S ROCK
 }
 
 // UI
