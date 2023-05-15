@@ -45,11 +45,11 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    material = new THREE.MeshPhongMaterial({ specular: 0x000000, shininess: 1 })
+    material = new THREE.MeshStandardMaterial({ color: 0xff0000, roughness: .1, metalness: .9 })
     let resolution = 28;
-
+    // effect
     let effectController = {
-        speed: 0.2,
+        speed: 0.05,
         numBlobs: 11,
         resolution: 70,
         isolation: 20,
@@ -64,7 +64,6 @@ export function sketch() {
     effect.enableUvs = false
     effect.enableColors = false
     scene.add(effect)
-
     // this controls content of marching cubes voxel field
     function updateCubes(object, time, numblobs, floor, wallx, wallz) {
         object.reset()
@@ -87,10 +86,10 @@ export function sketch() {
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
     scene.add(light)
-    const pointLight = new THREE.PointLight(0x0000ff)
+    const pointLight = new THREE.PointLight(0xff0000)
     pointLight.position.set(0, 0, 100)
     scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0x00faff)
+    const ambientLight = new THREE.AmbientLight(0xfffa00)
     scene.add(ambientLight)
 
     // ANIMATE
