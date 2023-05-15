@@ -12,6 +12,9 @@ let geometry
 let material
 let animation
 let onWindowResize
+let composer
+let renderPass
+let glitchPass
 
 export function sketch() {
     console.log("Sketch launched")
@@ -49,10 +52,10 @@ export function sketch() {
     scene.add(cube)
 
     // POST-PROCESSING
-    const composer = new EffectComposer(renderer)
-    const renderPass = new RenderPass(scene, camera)
+    composer = new EffectComposer(renderer)
+    renderPass = new RenderPass(scene, camera)
     composer.addPass(renderPass)
-    const glitchPass = new GlitchPass()
+    glitchPass = new GlitchPass()
     composer.addPass(glitchPass)
 
     // ANIMATE
@@ -76,6 +79,9 @@ export function sketch() {
 export function dispose() {
     cancelAnimationFrame(animation)
     renderer.dispose()
+    composer.dispose()
+    renderPass.dispose()
+    glitchPass.dispose()
     geometry.dispose()
     material.dispose()
     window.removeEventListener('resize', onWindowResize)
