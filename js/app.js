@@ -1,4 +1,20 @@
-// @fupete
+// By @fupete (c) 2023 | MIT License
+//
+// Credits: the base keyboard VJ engine idea is inspired and builded upon the works: 
+// RBVJ by George Gally Radarboy https://github.com/GeorgeGally/rbvj/ 
+// P5-VJ by Salil Parekh https://github.com/burnedsap/p5-vj 
+//
+// HELP:
+// [0-9] changeSet
+// [A-Z] changeSketch
+// [\] toggleMouse
+// [F6] toggleFullscreen
+// [mouse] orbit controls + depends on the sketch (testing)
+// 
+// COMING UP: 
+// - TouchOSC support
+// - Web Audio API support
+// - ...
 
 import "./init"
 
