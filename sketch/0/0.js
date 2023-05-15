@@ -10,6 +10,9 @@ import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js'
 let renderer
 let geometry
 let material
+let composer
+let renderPass
+let glitchPass
 let animation
 let onWindowResize
 
@@ -49,10 +52,10 @@ export function sketch() {
     scene.add(cube)
 
     // POST-PROCESSING
-    const composer = new EffectComposer(renderer)
-    const renderPass = new RenderPass(scene, camera)
+    composer = new EffectComposer(renderer)
+    renderPass = new RenderPass(scene, camera)
     composer.addPass(renderPass)
-    const glitchPass = new GlitchPass()
+    glitchPass = new GlitchPass()
     composer.addPass(glitchPass)
 
     // ANIMATE
@@ -76,6 +79,7 @@ export function sketch() {
 export function dispose() {
     cancelAnimationFrame(animation)
     renderer.dispose()
+    composer.dispose()
     geometry.dispose()
     material.dispose()
     window.removeEventListener('resize', onWindowResize)
