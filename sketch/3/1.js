@@ -1,4 +1,4 @@
-// Marching cubes
+// Marching cubes + texture
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
