@@ -42,7 +42,7 @@ global.canvas3D = document.getElementById("canvas3D") // global canvas3D
 // CHANGE SET & SKETCH
 const changeSet = (set) => {
 	current_set = set
-	// console.log("changeBank: " + current_set)
+	// console.log("changeSet: " + current_set)
 	changeSketch(0)
 }
 const changeSketch = (sketch) => {
