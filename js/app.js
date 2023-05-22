@@ -22,14 +22,15 @@
 // 7 - IMAGES [status: nd]
 // 
 // COMING UP: 
-// - GUI support
 // - Web Audio API support
 // - ...
 // - TouchOSC support
 
 import "./init"
 import * as THREE from 'three'
-global.THREE = THREE // global THREE
+import * as GUI from 'dat.gui'
+global.THREE = THREE
+global.GUI = GUI
 
 let myThree
 const artFolder = "sketch"

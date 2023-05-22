@@ -8,6 +8,7 @@ let geometry
 let material
 let animation
 let onWindowResize
+let gui
 
 export function sketch() {
     console.log("Sketch launched")
@@ -44,12 +45,23 @@ export function sketch() {
     // CONTROLS
     const controls = new OrbitControls(camera, renderer.domElement);
 
+    // GUI
+    gui = new GUI.GUI()
+    const cubeFolder = gui.addFolder('Cube')
+    cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'z', 0, Math.PI * 2)
+    cubeFolder.open()
+    const cameraFolder = gui.addFolder('Camera')
+    cameraFolder.add(camera.position, 'z', 0, 10)
+    cameraFolder.open()
+
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
 
         // ANIMATION
-        cube.rotation.x += 0.04
+        cube.rotation.x += 0.004
         cube.rotation.y += 0.01
         // ...
 
@@ -66,5 +78,6 @@ export function dispose() {
     renderer.dispose()
     geometry.dispose()
     material.dispose()
+    gui.destroy()
     window.removeEventListener('resize', onWindowResize)
 }

@@ -1,4 +1,4 @@
-// Rotating cube + Post processing Glitch
+// Rotating cube + Post processing Glitch + GUI
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -15,6 +15,7 @@ let onWindowResize
 let composer
 let renderPass
 let glitchPass
+let gui
 
 export function sketch() {
     console.log("Sketch launched")
@@ -58,6 +59,17 @@ export function sketch() {
     glitchPass = new GlitchPass()
     composer.addPass(glitchPass)
 
+    // GUI
+    gui = new GUI.GUI()
+    const cubeFolder = gui.addFolder('Cube')
+    cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'z', 0, Math.PI * 2)
+    cubeFolder.open()
+    const cameraFolder = gui.addFolder('Camera')
+    cameraFolder.add(camera.position, 'z', 0, 10)
+    cameraFolder.open()
+
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
@@ -84,5 +96,6 @@ export function dispose() {
     glitchPass.dispose()
     geometry.dispose()
     material.dispose()
+    gui.destroy()
     window.removeEventListener('resize', onWindowResize)
 }
