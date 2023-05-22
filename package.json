@@ -5,6 +5,7 @@
     "three": "^0.152.2"
   },
   "devDependencies": {
-    "vite": "^4.3.5"
+    "vite": "^4.3.5",
+    "vite-plugin-dynamic-import": "^1.4.0"
   }
 }

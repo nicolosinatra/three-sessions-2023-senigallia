@@ -48,7 +48,7 @@ const changeSet = (set) => {
 const changeSketch = (sketch) => {
 	current_sketch = sketch
 	const loc = current_set + '/' + current_sketch
-	const sketchName = artFolder + '/' + loc + '.js'
+	const sketchName = loc + '.js'
 	loadSketch(sketchName)
 	document.location.hash = loc
 }
@@ -58,8 +58,12 @@ const loadSketch = async (sketchName) => {
 		myThree = {}
 	}
 	canvas3D.replaceChildren()
-	myThree = await import(`/${sketchName}`)
+	myThree = await import(`../sketch/${sketchName}`)
 	myThree.sketch() // LET'S ROCK
+}
+const map = (value, min1, max1, min2, max2) => {
+	const returnvalue = ((value - min1) / (max1 - min1) * (max2 - min2)) + min2
+	return returnvalue
 }
 
 // UI
@@ -71,6 +75,7 @@ const onKeyDown = (event) => {
 		changeSet(keyCode - 48)
 	} else if (keyCode == 220) toggleMouse() // \
 	else if (keyCode == 117) toggleFullscreen() // F6
+	else if (keyCode == 222) initAudio() // 
 }
 window.addEventListener('keydown', function (e) {
 	if (typeof onKeyDown == 'function') onKeyDown(e);
