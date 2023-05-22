@@ -11,10 +11,21 @@
 // [F6] toggleFullscreen
 // [mouse] orbit controls + depends on the sketch (testing)
 // 
+// SCENES:
+// 0 - GRID [status: 1st draft]
+// 1 - SPHERES [status: nd ]
+// 2 - COLUMNS [status: nd]
+// 3 - CLOUDS [status: 1st draft]
+// 4 - LAVA [status: nd]
+// 5 - ...
+// 6 - SOCRATES [status: nd]
+// 7 - IMAGES [status: nd]
+// 
 // COMING UP: 
-// - TouchOSC support
+// - GUI support
 // - Web Audio API support
 // - ...
+// - TouchOSC support
 
 import "./init"
 import * as THREE from 'three'
