@@ -90,12 +90,12 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
-    composer.dispose()
-    renderPass.dispose()
-    glitchPass.dispose()
-    geometry.dispose()
-    material.dispose()
-    gui.destroy()
+    renderer?.dispose()
+    composer?.dispose()
+    renderPass?.dispose()
+    glitchPass?.dispose()
+    geometry?.dispose()
+    material?.dispose()
+    gui?.destroy()
     window.removeEventListener('resize', onWindowResize)
 }

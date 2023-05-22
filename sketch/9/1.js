@@ -75,9 +75,9 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
-    geometry.dispose()
-    material.dispose()
-    gui.destroy()
-    window.removeEventListener('resize', onWindowResize)
+    renderer?.dispose()
+    geometry?.dispose()
+    material?.dispose()
+    gui?.destroy()
+    window?.removeEventListener('resize', onWindowResize)
 }
