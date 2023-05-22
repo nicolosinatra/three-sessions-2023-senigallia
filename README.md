@@ -23,5 +23,9 @@ npm i
 ```
 npx vite
 ```
+### Build
+```
+npx vite build
+```
 
 _work in progress, more credits && work to come, stay tuned [@fupete](https://twitter.com/fupete)_
