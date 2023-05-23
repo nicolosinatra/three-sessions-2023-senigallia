@@ -1,22 +1,17 @@
-// Marching cubes
-
+// Marching cubes + texture
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-import { PerspectiveCamera } from 'three';
+import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
 
 let renderer
 let scene
-let material
 let effect
+let material
 let reflectionCube
 let animation
 let onWindowResize
-
-let effectController // per GUI
-let attractorController // test GUI per attrattore 
 
 export function sketch() {
     console.log("Sketch launched")
@@ -35,9 +30,8 @@ export function sketch() {
     canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
-    let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000) // era 75, window.innerWidth / window.innerHeight, 0.1, 1000
-    camera.position.y = 0
-    camera.position.z = 70 // era 50
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.z = 50
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -49,94 +43,84 @@ export function sketch() {
 
     // CONTROLS
     const controls = new OrbitControls(camera, renderer.domElement)
-    // controls.minDistance = 30;
-	// controls.maxDistance = 30; // può essere che ci servano per bloccare la camera
 
-    // GUI
-    setupGui();
-    
     // SCENE
     scene = new THREE.Scene()
-
-    // GUI 
-    // per controllare alcuni elementi della scena
-    function setupGui() {
-
-        // test attrattore GUI
-        /* attractorController = {
-            attractor_x: 0,
-            attractor_y: 0,
-            attractor_z: 0
-        } */
-        
-        let h;
-    
-        const gui = new GUI();
-    
-        // simulation
-        // h = gui.addFolder( 'Simulation' );
-       
-        //test attractor 
-        /* h.add( attractorController, 'attractor_x', -10, 10, 0.05);
-        h.add( attractorController, 'attractor_y', -10, 10, 0.05);
-        h.add( attractorController, 'attractor_z', -10, 10, 0.05); */
-
-        // camera
-        h = gui.addFolder( 'Camera' );
-        h.add( camera.position , 'x', -500, 500, 0.05 );
-        h.add( camera.position , 'y', -500, 500, 0.05 );
-        h.add( camera.position , 'z', -500, 500, 0.05 );
+    // texture
+    const path = './assets/textures/cube/MilkyWay/dark-s_'
+    const format = '.jpg'
+    const urls = [
+        path + 'px' + format, path + 'nx' + format,
+        path + 'py' + format, path + 'ny' + format,
+        path + 'pz' + format, path + 'nz' + format
+    ]
+    const cubeTextureLoader = new THREE.CubeTextureLoader()
+    reflectionCube = cubeTextureLoader.load(urls)
+    material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1 })
+    let resolution = 28;
+    // effect
+    let effectController = {
+        speed: 0.05,
+        numBlobs: 11,
+        resolution: 70,
+        isolation: 20,
+        floor: false,
+        wallx: false,
+        wallz: false,
+        dummy: function () { }
+    }
+    effect = new MarchingCubes(resolution, material, true, true, 100000)
+    effect.position.set(0, 0, 0)
+    effect.scale.set(50, 50, 50)
+    effect.enableUvs = false
+    effect.enableColors = false
+    scene.add(effect)
+    // this controls content of marching cubes voxel field
+    function updateCubes(object, time, numblobs, floor, wallx, wallz) {
+        object.reset()
+        // fill the field with some metaballs
+        const subtract = 12;
+        const strength = 1.2 / ((Math.sqrt(numblobs) - 1) / 4 + 1)
+        for (let i = 0; i < numblobs; i++) {
+            const ballx = Math.sin(i + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5
+            const bally = Math.abs(Math.cos(i + 1.12 * time * Math.cos(1.22 + 0.1424 * i))) * 0.77 // dip into the floor
+            const ballz = Math.cos(i + 1.32 * time * 0.1 * Math.sin((0.92 + 0.53 * i))) * 0.27 + 0.5
+            object.addBall(ballx, bally, ballz, strength, subtract)
+        }
+        if (floor) object.addPlaneY(2, 12)
+        if (wallz) object.addPlaneZ(2, 12)
+        if (wallx) object.addPlaneX(2, 12)
+        object.update()
     }
 
-    // SFERA ATTRATTORE
-    const geometry = new THREE.SphereGeometry( 5, 32, 16 ); 
-    const sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
-    const attractor = new THREE.Mesh( geometry, sphereMaterial ); 
-    scene.add( attractor ); 
-
-    // test sfera attrattore
-    /* function updateAttractor(attractor_x, attractor_y, attractor_z) {
-        attractor.position.set(attractor_x, attractor_y, attractor_z);
-    }  */
-
-    // MOUSE CLICK
-    window.addEventListener('click', function() {
-        // MOUSE POINTER
-        const raycaster = new THREE.Raycaster();
-        const pointer = new THREE.Vector2();
-    
-        function onPointerMove( event ) {
-            // calculate pointer position in normalized device coordinates
-            // (-1 to +1) for both components
-            pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-            attractor.position.set(pointer.x*70, pointer.y*30, 0 )
-            console.log(pointer);
-        }
-        // update the picking ray with the camera and pointer position
-        raycaster.setFromCamera( pointer, camera );
-        window.addEventListener( 'pointermove', onPointerMove );
-    })
-    
     // LIGHTS
-    /* const light = new THREE.DirectionalLight(0xffffff)
+    const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
-    scene.add(light) */
-    /* const pointLight = new THREE.PointLight(0xffffff)
+    scene.add(light)
+    const pointLight = new THREE.PointLight(0x0000ff)
     pointLight.position.set(0, 0, 100)
-    scene.add(pointLight) */
-    const ambientLight = new THREE.AmbientLight(0xffffff)
+    scene.add(pointLight)
+    const ambientLight = new THREE.AmbientLight(0x00faff)
     scene.add(ambientLight)
-    
+
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
 
         // ANIMATION
+        const delta = clock.getDelta();
+        time += delta * effectController.speed * 0.5; 
+        // marching cubes
+        if (effectController.resolution !== resolution) {
+            resolution = effectController.resolution;
+            effect.init(Math.floor(resolution));
+        }
+        if (effectController.isolation !== effect.isolation) {
+            effect.isolation = effectController.isolation;
+        }
+        updateCubes(effect, time, effectController.numBlobs, effectController.floor, effectController.wallx, effectController.wallz);
+        // ...
 
-        // test sfera attrattore GUI
-        // updateAttractor(attractorController.attractor_x, attractorController.attractor_y, attractorController.attractor_z);
-        
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
 
@@ -145,11 +129,10 @@ export function sketch() {
     animate()
 }
 
-
-
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
-    material.dispose()
+    renderer?.dispose()
+    material?.dispose()
+    reflectionCube?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }
