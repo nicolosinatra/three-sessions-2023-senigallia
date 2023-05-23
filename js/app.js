@@ -231,7 +231,7 @@ const onKeyDown = (event) => {
 		changeSet(keyCode - 48)
 	} else if (keyCode == 220) toggleMouse() // \
 	else if (keyCode == 117) toggleFullscreen() // F6
-	else if (keyCode == 222) initAudio() // 
+	else if (keyCode == 222) initAudio() // (shift) + ?
 }
 window.addEventListener('keydown', function (e) {
 	if (typeof onKeyDown == 'function') onKeyDown(e);
