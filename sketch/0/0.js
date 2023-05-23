@@ -57,9 +57,9 @@ export function sketch() {
             j++;
         }
     }
-    geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1));
+    geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1)) 
     material = new THREE.ShaderMaterial({
         uniforms: {
             color: { value: new THREE.Color(0xffffff) },
@@ -111,8 +111,8 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
-    geometry.dispose()
-    material.dispose()
+    renderer?.dispose()
+    geometry?.dispose()
+    material?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }

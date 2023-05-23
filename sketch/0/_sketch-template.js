@@ -7,6 +7,7 @@ let material
 let geometry
 let animation
 let onWindowResize
+let gui
 
 export function sketch(canvas3D, THREE) {
     console.log("Sketch launched")
@@ -42,6 +43,13 @@ export function sketch(canvas3D, THREE) {
     // ...
     // scene.add(X)
 
+    // GUI
+    gui = new GUI.GUI()
+    const nameFolder = gui.addFolder('Name of the folder')
+    nameFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+    nameFolder.open()
+    // ...
+
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
@@ -62,5 +70,7 @@ export function dispose() {
     renderer.dispose()
     // geometry.dispose()
     // material.dispose()
+    // gui.destroy()
+    // ...
     window.removeEventListener('resize', onWindowResize)
 }
