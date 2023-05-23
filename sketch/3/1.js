@@ -109,7 +109,7 @@ export function sketch() {
 
         // ANIMATION
         const delta = clock.getDelta();
-        time += delta * effectController.speed * 0.5;
+        time += delta * effectController.speed * 0.5; 
         // marching cubes
         if (effectController.resolution !== resolution) {
             resolution = effectController.resolution;
