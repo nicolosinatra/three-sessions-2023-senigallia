@@ -29,8 +29,10 @@
 import "./init"
 import * as THREE from 'three'
 import * as GUI from 'dat.gui'
+import * as CANNON from 'cannon-es'
 global.THREE = THREE
 global.GUI = GUI
+global.CANNON = CANNON
 
 let myThree
 const artFolder = "sketch"
