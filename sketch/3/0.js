@@ -120,7 +120,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
-    material.dispose()
+    renderer?.dispose()
+    material?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }
