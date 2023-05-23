@@ -22,7 +22,7 @@
 // 7 - IMAGES [status: nd]
 // 
 // COMING UP: 
-// - Web Audio API support
+// - Maybe Easing + Physics
 // - ...
 // - TouchOSC support
 
