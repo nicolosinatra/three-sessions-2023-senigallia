@@ -27,7 +27,7 @@ export function sketch() {
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
-    camera.position.z = 1000
+    camera.position.y = 1000
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -42,7 +42,9 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    const SEPARATION = 100, AMOUNTX = 50, AMOUNTY = 50
+    const SEPARATION = 50 + Math.random() * 5
+    const AMOUNTX = 30 + Math.random() * 20
+    const AMOUNTY = 10 + Math.random() * 10
     const numParticles = AMOUNTX * AMOUNTY
     const positions = new Float32Array(numParticles * 3)
     const scales = new Float32Array(numParticles)
@@ -52,9 +54,9 @@ export function sketch() {
             positions[i] = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2) // x
             positions[i + 1] = 0 // y
             positions[i + 2] = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2) // z
-            scales[j] = 1;
-            i += 3;
-            j++;
+            scales[j] = 1
+            i += 3
+            j++
         }
     }
     geometry = new THREE.BufferGeometry()
@@ -89,8 +91,10 @@ export function sketch() {
         let i = 0, j = 0
         for (let ix = 0; ix < AMOUNTX; ix++) {
             for (let iy = 0; iy < AMOUNTY; iy++) {
-                positions[i + 1] = (Math.sin((ix + count) * 0.3) * 50) + (Math.sin((iy + count) * 0.5) * 50)
-                scales[j] = (Math.sin((ix + count) * 0.3) + 1) * 20 + (Math.sin((iy + count) * 0.5) + 1) * 20
+                positions[i + 1] = MIC.mapSound((i + 1) / 3, numParticles, 0, 100)
+                scales[j] = MIC.getVol() * .4
+                // positions[i + 1] = (Math.sin((ix + count) * 0.3) * 50) + (Math.sin((iy + count) * 0.5) * 50)
+                // scales[j] = (Math.sin((ix + count) * 0.3) + 1) * 20 + (Math.sin((iy + count) * 0.5) + 1) * 20
                 i += 3
                 j++
             }
