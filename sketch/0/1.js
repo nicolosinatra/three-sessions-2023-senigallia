@@ -1,105 +1,139 @@
+import Stats from 'three/addons/libs/stats.module.js' // XXX
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-import Stats from 'three/examples/jsm/libs/stats.module.js' 
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+let renderer
+let scene
+let material 
+let geometry
+let animation
+let onWindowResize
+let gui
+let textureEquirec, textureCube;
 
-
-
-export function sketch(canvas3D, THREE) {
+export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
+    // RENDERER
+    renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true
+    })
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    canvas3D.appendChild(renderer.domElement)
 
-// RENDERER
-        renderer = new THREE.WebGLRenderer({
-            alpha: true,
-            antialias: true
-        })
-        renderer.setSize(window.innerWidth, window.innerHeight)
-        canvas3D.appendChild(renderer.domElement)
-        renderer.setAnimationLoop(animate);
-     
+    // CAMERA
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.z = 5
 
-// CAMERA
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
-    camera.position.z = 1000
-
-
-// WINDOW RESIZE
+    // WINDOW RESIZE
     const onWindowResize = () => {
         camera.aspect = window.innerWidth / window.innerHeight
         camera.updateProjectionMatrix()
         renderer.setSize(window.innerWidth, window.innerHeight)
     }
-    window.addEventListener('resize', onWindowResize) 
-    
-// CONTROLS
+    window.addEventListener('resize', onWindowResize)
+
+    // CONTROLS
     const controls = new OrbitControls(camera, renderer.domElement)
 
-//SCENE
-const scene = new THREE.Scene()
+    // SCENE
+    scene = new THREE.Scene()
+    material = new THREE.MeshPhongMaterial({ specular: 0x000000, shininess: 1 })
+    // ...
+    // scene.add(X)
 
- //sfere
-const sphere = new THREE.SphereGeometry(1, 50, 50)
-const sphere2 = new THREE.SphereGeometry(1, 50, 50)
-const material1 = new THREE.MeshSatandarMaterial({ 
-    map: colorTexture,
-    roughness: .1, 
-    metalness: .9
-})
-const material2 = new THREE.MeshSatandarMaterial({ 
-    color: 0xff0000,
-    roughness: .9, 
-    metalness: .5
-})
-const mesh = new THREE.Mesh(sphere, sphere2, material)
-scene.add(mesh)
-sphere.positin.x = 1.5;
-sphere2.position.x = -1.5;
-//texture
-const textureLoader = new THREE.TextureLoader( loadingManager)
-const colorTexture = textureLoader.load ('public/assets/texture/cube/MilkyWay/dark-s_pz.jpg')
-colorTexture.generateMipmaps = false
-colorTexture.minFilter = THREENearestFilter
+    //texture
+    const loader = new THREE.CubeTextureLoader();
+				loader.setPath( 'public/assets/textures/cube/teatro/' );
 
+				textureCube = loader.load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
+				textureCube.colorSpace = THREE.SRGBColorSpace;
+
+				const textureLoader = new THREE.TextureLoader();
+
+				textureEquirec = textureLoader.load( 'public/assets/textures/metal/MetalStainlessSteelBrushedElongated005_COL_4K_METALNESS.jpg' );
+				textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+				textureEquirec.colorSpace = THREE.SRGBColorSpace;
+
+				scene.background = ({color: "#808080"});
+
+
+     //sfera
+     geometry = new THREE.SphereGeometry( 1, 50, 50 ); 
+     const material1 = new THREE.MeshBasicMaterial( { envMap: textureCube} ); 
+     const sphere = new THREE.Mesh( geometry, material1 ); 
+     scene.add( sphere );
+     sphere.position.x = 1.5;
+
+     const geometry2 = new THREE.SphereGeometry( 1, 50, 50 ); 
+     const material2 = new THREE.MeshPhysicalMaterial( { envMap: textureEquirec, 
+        metalness: 0.3, 
+        roughness: 0.8,
+        color: "#C3C8C9"
+    } ); 
+     const sphere2 = new THREE.Mesh( geometry2, material2 ); 
+     scene.add( sphere2 );
+     sphere2.position.x = -1.5;
 
 // LIGHTS
-    const light = new THREE.DirectionalLight(0xffffff)
-    light.position.set(0.5, 0.5, 1)
-    scene.add(light)
-    const pointLight = new THREE.PointLight(0xff0000)
-    pointLight.position.set(0, 0, 100)
-    scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0xfffa00)
-    scene.add(ambientLight)
+const light = new THREE.AmbientLight( 0x404040 ); // soft white light
+scene.add( light );
+const directionalLight = new THREE.DirectionalLight( {color: "#666666",  intensity: 0.05 } );
+directionalLight.position.set( 1, 0, 7 );
+scene.add( directionalLight );
+    
 
+    const params = {
+        Cube: function () {
 
-//animate
-const clock = new THREE.Clock()
+            scene.background = textureCube;
 
-const tick = () => {
-    const elapsedTime = clock.getElapsedTime()
+            sphereMaterial.envMap = textureCube;
+            sphereMaterial.needsUpdate = true;
 
-    //update controls
-    controls.update()
+        },
+        Equirectangular: function () {
 
-    //render
-    renderer.render(scene, camera)
-    stats.end() // XXX
+            scene.background = textureEquirec;
 
-    //chiamo tick
-    window.requestAnimationFrame( tick )
+            sphereMaterial.envMap = textureEquirec;
+            sphereMaterial.needsUpdate = true;
 
-}
+        },
+        Refraction: false
+    };
 
-tick()
+    // GUI
+    gui = new GUI.GUI()
+    const nameFolder = gui.addFolder('Name of the folder')
+    nameFolder.add(sphere.rotation, 'x', 0, Math.PI * 2)
+    nameFolder.open()
+    // ...
 
+    // ANIMATE
+    const animate = () => {
+        stats.begin() // XXX
+
+        // ANIMATION
+    
+        // ...
+
+        renderer.render(scene, camera) // RENDER
+        stats.end() // XXX
+
+        animation = requestAnimationFrame(animate) // CIAK
+    }
+    animate()
 }
 
 export function dispose() {
     cancelAnimationFrame(animation)
     renderer.dispose()
-    geometry.dispose()
-    material.dispose()
+    // geometry.dispose()
+    // material.dispose()
+    // gui.destroy()
+    // ...
     window.removeEventListener('resize', onWindowResize)
 }
