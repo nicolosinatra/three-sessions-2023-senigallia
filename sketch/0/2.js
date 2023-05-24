@@ -1,4 +1,4 @@
-// Particles grid + Shader
+// Particles grid + Shader + Wave effect
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -89,8 +89,8 @@ export function sketch() {
         const scales = particles.geometry.attributes.scale.array;
         let i = 0, j = 0
         for (let ix = 0; ix < AMOUNTX; ix++) {
+            const freqAmplitude = MIC.mapSound(ix, AMOUNTX, 0, 200)
             for (let iy = 0; iy < AMOUNTY; iy++) {
-                const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 200)
                 positions[i + 1] = freqAmplitude
                 scales[j] = 2 + freqAmplitude / 10
                 i += 3
