@@ -1,5 +1,4 @@
 // Rotating cube
-import * as THREE from "three"; // xxx
 //import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js' // XXX
