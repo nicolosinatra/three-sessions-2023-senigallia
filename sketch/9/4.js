@@ -46,6 +46,7 @@ export function sketch() {
     scene.add(spheres)
     world = new CANNON.World({
         gravity: new CANNON.Vec3(0, 0, 0), // m/s²
+        frictionGravity: new CANNON.Vec3(1,1,1)
     })
     // const physicsMaterial = new CANNON.Material("groundMaterial")
     // const physicsContactMaterial = new CANNON.ContactMaterial(
