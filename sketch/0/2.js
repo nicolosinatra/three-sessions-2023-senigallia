@@ -1,4 +1,4 @@
-// Particles grid + Shader
+// Particles grid + Shader + Wave effect
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -8,7 +8,6 @@ let scene
 let material
 let geometry
 let particles
-let count = 0
 let animation
 let onWindowResize
 
@@ -27,7 +26,7 @@ export function sketch() {
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
-    camera.position.z = 1000
+    camera.position.y = 1000
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -42,7 +41,9 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    const SEPARATION = 100, AMOUNTX = 50, AMOUNTY = 50
+    const SEPARATION = 50
+    const AMOUNTX = 35
+    const AMOUNTY = 12
     const numParticles = AMOUNTX * AMOUNTY
     const positions = new Float32Array(numParticles * 3)
     const scales = new Float32Array(numParticles)
@@ -52,9 +53,9 @@ export function sketch() {
             positions[i] = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2) // x
             positions[i + 1] = 0 // y
             positions[i + 2] = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2) // z
-            scales[j] = 1;
-            i += 3;
-            j++;
+            scales[j] = 1
+            i += 3
+            j++
         }
     }
     geometry = new THREE.BufferGeometry()
@@ -88,16 +89,16 @@ export function sketch() {
         const scales = particles.geometry.attributes.scale.array;
         let i = 0, j = 0
         for (let ix = 0; ix < AMOUNTX; ix++) {
+            const freqAmplitude = MIC.mapSound(ix, AMOUNTX, 0, 200)
             for (let iy = 0; iy < AMOUNTY; iy++) {
-                positions[i + 1] = (Math.sin((ix + count) * 0.3) * 50) + (Math.sin((iy + count) * 0.5) * 50)
-                scales[j] = (Math.sin((ix + count) * 0.3) + 1) * 20 + (Math.sin((iy + count) * 0.5) + 1) * 20
+                positions[i + 1] = freqAmplitude
+                scales[j] = 2 + freqAmplitude / 10
                 i += 3
                 j++
             }
         }
         particles.geometry.attributes.position.needsUpdate = true
         particles.geometry.attributes.scale.needsUpdate = true
-        count += 0.1
 
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
