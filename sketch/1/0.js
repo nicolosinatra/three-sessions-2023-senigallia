@@ -5,8 +5,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 let renderer
 let scene
 let geometry
+let groundGeom
 let material
 let material2
+let groundMate
 let reflectionCube
 let bumpMap
 let diffMap
@@ -49,7 +51,7 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x222222)
+    scene.background = new THREE.Color(0x000000)
     scene.fog = new THREE.Fog(scene.background, 10, 100)
     geometry = new THREE.SphereGeometry(1, 32, 32)
     // child
@@ -78,7 +80,7 @@ export function sketch() {
         child.position.x = 5
         child.position.y = 7
         child.castShadow = true
-        child.receiveShadow = true
+        child.receiveShadow = false
         scene.add(child)
     })
     // parent
@@ -104,11 +106,6 @@ export function sketch() {
         parent.receiveShadow = true
         scene.add(parent)
     })
-
-    // material2 = new THREE.MeshStandardMaterial({ color: 0x6c5c4c, map: diffMap, bumpMap: bumpMap, bumpScale: .2, roughness: .5, metalness: .1 })
-
-
-
 
     // LIGHTS
     let lightS = new THREE.SpotLight(0x999999, 1, 0, Math.PI / 5, 0.3)
@@ -137,8 +134,8 @@ export function sketch() {
     // scene.add(ambientLight)
 
     // let's make a ground
-    let groundGeom = new THREE.PlaneGeometry(20, 20)
-    let groundMate = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 1 })
+    groundGeom = new THREE.PlaneGeometry(20,20)
+    groundMate = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 1 })
     let ground = new THREE.Mesh(groundGeom, groundMate)
     ground.position.set(0, floor, 0)
     ground.rotation.x = - Math.PI / 2
@@ -157,7 +154,6 @@ export function sketch() {
 
         const t = t0 + performance.now() * 0.0001
 
-        // t+=0.0005
         // ANIMATION
         if (parent) {
             // parent.position.x = -2 + noise3D(0,t,0) * .2
@@ -166,8 +162,8 @@ export function sketch() {
         }
         if (child) {
             child.position.x = 5 + noise3D(0, t + 12, 0) * .3
-            child.position.y = 1 + noise3D(t + 12, 0, 0) * 1
-            child.position.z = noise3D(0, 0, t + 12) * .2
+            child.position.y = 1 + noise3D(t + 24, 0, 0) * 1.5
+            child.position.z = noise3D(0, 0, t + 35) * .2
         }
         // ...
 
@@ -183,8 +179,10 @@ export function dispose() {
     cancelAnimationFrame(animation)
     renderer?.dispose()
     geometry?.dispose()
+    groundGeom?.dispose()
     material?.dispose()
     material2?.dispose()
+    groundMate?.dispose()
     reflectionCube?.dispose()
     bumpMap?.dispose()
     diffMap?.dispose()
