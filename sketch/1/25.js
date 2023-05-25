@@ -46,14 +46,14 @@ export function sketch() {
 
     //texture
     const loader = new THREE.CubeTextureLoader();
-				loader.setPath( 'public/assets/textures/cube/teatro/' );
+				loader.setPath( '/assets/textures/cube/teatro/' );
 
 				textureCube = loader.load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
 				textureCube.colorSpace = THREE.SRGBColorSpace;
 
 				const textureLoader = new THREE.TextureLoader();
 
-				textureEquirec = textureLoader.load( 'public/assets/textures/metal/MetalStainlessSteelBrushedElongated005_COL_4K_METALNESS.jpg' );
+				textureEquirec = textureLoader.load( '/assets/textures/metal/MetalStainlessSteelBrushedElongated005_COL_4K_METALNESS.jpg' );
 				textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
 				textureEquirec.colorSpace = THREE.SRGBColorSpace;
 

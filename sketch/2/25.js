@@ -8,12 +8,12 @@ let geometry
 let material
 let animation
 let onWindowResize
-let colonna1 = [];
-let colonna2 = [];
-let colonna3 = [];
-let colonna4 = [];
-let colonna5 = [];
-let pensatoio = [];
+let colonna1 = []
+let colonna2 = []
+let colonna3 = []
+let colonna4 = []
+let colonna5 = []
+let pensatoio = []
 
 export function sketch() {
     console.log("Sketch launched")
@@ -212,9 +212,9 @@ function addShadowedLight( x, y, z, color, intensity ) {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
-    geometry.dispose()
-    material.dispose()
+    renderer?.dispose()
+    geometry?.dispose()
+    material?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }
 
