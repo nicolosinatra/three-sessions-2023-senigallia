@@ -257,7 +257,7 @@ const toggleFullscreen = () => {
 // INIT
 const init = () => {
 	window.document.body.style.cursor = 'none'
-	changeSketch(0)
+	changeSet(1)
 	// setTimeout(() => {
 	// 	toggleFullscreen();
 	//   }, 5000);
