@@ -1,19 +1,19 @@
-// Rotating cube
-//import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// Column + Cannon
+
 import Stats from 'three/addons/libs/stats.module.js' // XXX
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { degToRad } from 'three/src/math/MathUtils'
 
 let renderer
 let geometry
+let geometryPlane
 let material
 let animation
 let onWindowResize
-let colonna1 = [];
-let colonna2 = [];
-let colonna3 = [];
-let colonna4 = [];
-let colonna5 = [];
-let pensatoio = [];
+let world
+let pieceBody
+let pieceGeometry
+const pieceMaterials = []
 
 export function sketch() {
     console.log("Sketch launched")
@@ -23,14 +23,16 @@ export function sketch() {
     // RENDERER
     renderer = new THREE.WebGLRenderer({
         alpha: true,
-        antialias: true
+        antialias: true,
     })
+    renderer.shadowMap.enabled = true
     renderer.setSize(window.innerWidth, window.innerHeight)
     canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-    camera.position.z = 20, 0, 0
+    let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.y = 1.2
+    camera.position.z = 5
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -40,146 +42,148 @@ export function sketch() {
     }
     window.addEventListener('resize', onWindowResize)
 
-    //SCENE
-	const scene = new THREE.Scene();
-	scene.userData.camera = camera;
-    //scene.add( new THREE.Mesh( geometry, material ) );
-    scene.add( new THREE.HemisphereLight( 0xaaaaaa, 0x444444 ) );
+    // SCENE + CANNON
+    // add ground
+    // multiple cubes (for/circle)
 
-    //SOLIDS
-    const cubo = new THREE.Mesh(
-        new THREE.BoxGeometry(2, 2, 2),
-        new THREE.MeshStandardMaterial({ color: 0x1CFF01 })
-    )
-    const dodecaedro = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(2, 0),
-        new THREE.MeshStandardMaterial({ color: 0xFA01E0 })
-    )
-    const dodecaedro2 = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(1, 0),
-        new THREE.MeshStandardMaterial({ color: 0x01FFF4 })
-    )
-    const cubo2 = new THREE.Mesh(
-        new THREE.BoxGeometry(2, 2, 2),
-        new THREE.MeshStandardMaterial({ color: 0xEAFF00 })
-    )
-    
-    cubo.position.set(0, 0, 0)
-    //scene.add(cubo)
-    dodecaedro.position.set(0, 2.9, 0)
-    //scene.add(dodecaedro)
-    dodecaedro2.position.set(0, 5.65, 0)
-    //scene.add(dodecaedro2)
-    cubo2.position.set(0, 7.8, 0)
-    //scene.add(ottaedro)
+    // World
+    const scene = new THREE.Scene()
+    world = new CANNON.World({
+        gravity: new CANNON.Vec3(0, -8.9, 0)
+    })
+    // Default material
+    const defaultMaterial = new CANNON.Material('default')
+    const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
+        friction: .9,
+        restitution: 0,
+        contactEquationStiffness: 1e5,
+        contactEquationRelaxation: 2
+    })
+    world.defaultContactMaterial = defaultContactMaterial
 
-    //COLUMNS
-    colonna1.push(
-        cubo2,
-        cubo,
-        dodecaedro2,
-        dodecaedro
-    );
-    //scene.add(colonna1);
-    scene.add(
-        cubo2,
-        cubo,
-        dodecaedro2,
-        dodecaedro
-    );
-    console.log(colonna1); 
+    // COLUMNS
+    const columnsNo = 12
+    const columnsRadius = 9
+    const columns = []
+    const columnsPositions = []
+    for (let i = 0; i < columnsNo; i++) {
+        columnsPositions.push({
+            x: columnsRadius * Math.cos((2 * Math.PI * i) / columnsNo),
+            z: columnsRadius * Math.sin((2 * Math.PI * i) / columnsNo)
+        })
+    }
+    // COLUMNSMATERIALS
+    const pieceColors = [0xff0000, 0x00ff00, 0xff00ff, 0xffff00, 0x0000ff]
+    for (let i = 0; i < pieceColors.length; i++) {
+        pieceMaterials.push(new THREE.MeshStandardMaterial({ color: pieceColors[i], roughness: 1 }))
+    }
+    // COLUMN
+    const itemsNo = 7
+    const addPiece = (col, id, pos, size) => {
+        const sizeX = size * 2
+        const sizeY = size + Math.random() * .1
+        const sizeZ = size * 2
+        const pieceBodyShape = new CANNON.Box(new CANNON.Vec3(sizeX, sizeY, sizeZ))
+        pieceGeometry = new THREE.BoxGeometry(sizeX * 2, sizeY * 2, sizeZ * 2)
+        const position = new CANNON.Vec3(
+            pos.x - 0.05 + Math.random() * .005,
+            15,
+            pos.z - 0.05 + Math.random() * .005,
+        )
+        pieceBody = new CANNON.Body({
+            position,
+            mass: 1, // .5 + Math.random() * 2,
+            shape: pieceBodyShape,
+            allowSleep: true,
+        })
 
-    colonna2.push(
-        cubo,
-        dodecaedro,
-        dodecaedro2,
-        cubo2
-    );
-    //scene.add(colonna2);
-    scene.add(
-        cubo,
-        dodecaedro,
-        dodecaedro2,
-        cubo2
-    );
-    console.log(colonna2);
+        pieceBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0), Math.PI / Math.random())
 
-    colonna3.push(
-        dodecaedro,
-        cubo2,
-        dodecaedro2,
-        cubo,
-    );
-    //scene.add(colonna3);
-    scene.add(
-        dodecaedro,
-        cubo2,
-        dodecaedro2,
-        cubo,
-    );
-    console.log(colonna3);
+        const piece = new THREE.Mesh(pieceGeometry, pieceMaterials[Math.round(Math.random() * (pieceMaterials.length - 1))])
+        col.push({
+            pieceBody: pieceBody,
+            piece: piece,
+        })
+        world.addBody(col[id].pieceBody)
+        scene.add(col[id].piece)
+        col[id].piece.castShadow = true
+        col[id].piece.receiveShadow = false
+    }
 
-    colonna4.push(
-        cubo2,
-        cubo,
-        dodecaedro2,
-        dodecaedro,
-    );
-    //scene.add(colonna4);
-    scene.add(
-        cubo2,
-        cubo,
-        dodecaedro2,
-        dodecaedro,
-    );
-    console.log(colonna4);
+    for (let i = 0; i < columnsNo; i++) {
+        const column = []
+        const maxSize = 0.4
+        columns.push(column)
+        for (let j = 0; j < itemsNo; j++) {
+            let size = maxSize - j * 0.02
+            setTimeout(() => {
+                addPiece(columns[i], j, columnsPositions[i], size)
+            }, j * 5000 + Math.random() * 2000)
+        }
+        // console.log(columns[i])
+    }
 
-    colonna5.push(
-        cubo,
-        dodecaedro2,
-        cubo2,
-        dodecaedro,
-    );
-    //scene.add(colonna5);
-    scene.add(
-        cubo,
-        dodecaedro2,
-        cubo2,
-        dodecaedro,
-    );
-    console.log(colonna5);
 
-    pensatoio.push(
-        colonna1,
-        colonna2,
-        colonna3,
-        colonna4,
-        colonna5
-    );
+    // Static ground plane
+    geometryPlane = new THREE.PlaneGeometry(100, 100)
+    const planeMaterial = new THREE.MeshLambertMaterial({color: 0x442200})
+    const plane = new THREE.Mesh(geometryPlane, planeMaterial)
+    plane.castShadow = false
+    plane.receiveShadow = true
+    const groundBody = new CANNON.Body({
+        position: new CANNON.Vec3(0, 0, 0),
+        mass: 0,
+        shape: new CANNON.Plane(),
+    })
+    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2)
+    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+    scene.add(plane)
+    world.addBody(groundBody)
+    plane.position.copy(groundBody.position)
+    plane.quaternion.copy(groundBody.quaternion)
 
-    console.log(pensatoio);
-    console.log("pensatoio caricato!");
+    // LIGHTS
+    const light = new THREE.DirectionalLight(0xffffff)
+    light.position.set(0, 2, 5)
+    light.castShadow = true
+    scene.add(light)
+    const pointLight = new THREE.PointLight(0xffffff)
+    pointLight.position.set(0, 0, 100)
+    scene.add(pointLight)
+    const ambientLight = new THREE.AmbientLight(0xffffff)
+    scene.add(ambientLight)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement,scene.userData.camera, scene.userData.element);
-	controls.minDistance = 2;
-	controls.maxDistance = 5;
-	controls.enablePan = false;
-    controls.enableZoom = false;
-	scene.userData.controls = controls;
-
-    //LIGHT
-    const light = new THREE.DirectionalLight( 0xffffff, 0.5 );
-    light.position.set( 1, 1, 1 );
-    scene.add( light );
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.target.y = 2.5
+    controls.update()
 
     // ANIMATE
+    const timeStep = 1 / 60 // seconds
+    let lastCallTime
     const animate = () => {
         stats.begin() // XXX
 
+        const time = performance.now() / 1000 // seconds
+        if (!lastCallTime) {
+            world.step(timeStep)
+        } else {
+            const dt = time - lastCallTime
+            world.step(timeStep, dt)
+        }
+        lastCallTime = time
+
+        // CANNON
+        // world.fixedStep()
+        for (let i = 0; i < columns.length; i++) {
+            for (let j = 0; j < columns[i].length; j++) {
+                columns[i][j].piece.position.copy(columns[i][j].pieceBody.position)
+                columns[i][j].piece.quaternion.copy(columns[i][j].pieceBody.quaternion)
+            }
+        }
+
+        camera.rotateY(.0001)
         // ANIMATION
-
-
         // ...
 
         renderer.render(scene, camera) // RENDER
@@ -190,62 +194,20 @@ export function sketch() {
     animate()
 }
 
-function addShadowedLight( x, y, z, color, intensity ) {
-    const directionalLight = new THREE.DirectionalLight( color, intensity );
-	directionalLight.position.set( x, y, z );
-	scene.add( directionalLight );
-
-	directionalLight.castShadow = true;
-
-	const d = 1;
-	directionalLight.shadow.camera.left = - d;
-	directionalLight.shadow.camera.right = d;
-	directionalLight.shadow.camera.top = d;
-	directionalLight.shadow.camera.bottom = - d;
-
-	directionalLight.shadow.camera.near = 1;
-	directionalLight.shadow.camera.far = 4;
-
-	directionalLight.shadow.bias = - 0.002;
-
-}
-
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
-    geometry.dispose()
-    material.dispose()
-    window.removeEventListener('resize', onWindowResize)
+    renderer?.dispose()
+    renderer?.forceContextLoss()
+    geometryPlane?.dispose()
+    pieceGeometry?.dispose()
+    material?.dispose()
+    for (let i = 0; i < pieceMaterials.length; i++) {
+        pieceMaterials[i]?.dispose()
+    }
+    world = null
+    let id = window.setTimeout(function () { }, 0)
+    while (id--) {
+        window.clearTimeout(id)
+    }
+    window?.removeEventListener('resize', onWindowResize)
 }
-
-
-//GLTFLoader
-    // const loader = new GLTFLoader();
-    // loader.load(
-    //     // resource URL
-    //     '../colonne.gltf',
-    //     // called when the resource is loaded
-    //     function ( gltf ) {
-    
-    //         scene.add( gltf.scene );
-    //         //gltf.animations; // Array<THREE.AnimationClip>
-    //         gltf.scene.scale.set(0.5, 0.5, 0.5); 
-    //         gltf.scene; // THREE.Group
-    //         gltf.scenes; // Array<THREE.Group>
-    //         gltf.asset; // Object
-            
-    //     },
-    //     // called while loading is progressing
-    //     function ( xhr ) {
-    
-    //         console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-    
-    //     },
-    //     // called when loading has errors
-    //     function ( error ) {
-    
-    //         console.log( 'An error happened' );
-    
-    //     }
-    // );
-    // console.log("colonna caricata");
