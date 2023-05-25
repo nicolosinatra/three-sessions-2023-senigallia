@@ -1,5 +1,4 @@
 // Planets + Noise
-
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
@@ -13,6 +12,7 @@ let bumpMap
 let diffMap
 let animation
 let onWindowResize
+let noise3D
 
 export function sketch() {
     console.log("Sketch launched")
@@ -91,7 +91,7 @@ export function sketch() {
         bumpMap.wrapS = bumpMap.wrapT = THREE.RepeatWrapping
         bumpMap.repeat.set(4, 4)
         parent = new THREE.Mesh(geometry, material2)
-        parent.position.x = -5
+        parent.position.x = -2
         parent.scale.set(3, 3, 3)
         parent.castShadow = true
         parent.receiveShadow = true
@@ -117,12 +117,28 @@ export function sketch() {
     // const ambientLight = new THREE.AmbientLight(0xffffff)
     // scene.add(ambientLight)
 
+    // NOISE
+    noise3D = NOISE.createNoise3D()
+    const t0 = Math.random() * 10
+
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
+        
+        const t = t0 + performance.now() * 0.0001
 
+        // t+=0.0005
         // ANIMATION
-        // marching cubes
+        if (parent) {
+            // parent.position.x = -2 + noise3D(0,t,0) * .2
+            parent.position.y = noise3D(t,0,0) * .2
+            // parent.position.z = noise3D(0,0,t) * .1
+        }
+        if (child) {
+            child.position.x = 5 + noise3D(0,t+12,0) * .3
+            child.position.y = noise3D(t+12,0,0) * 1
+            child.position.z = noise3D(0,0,t+12) * .2
+        }
         // ...
 
         renderer.render(scene, camera) // RENDER
@@ -142,5 +158,6 @@ export function dispose() {
     reflectionCube?.dispose()
     bumpMap?.dispose()
     diffMap?.dispose()
+    noise3D = null
     window.removeEventListener('resize', onWindowResize)
 }

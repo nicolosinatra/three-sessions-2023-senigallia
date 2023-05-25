@@ -30,9 +30,11 @@ import "./init"
 import * as THREE from 'three'
 import * as GUI from 'dat.gui'
 import * as CANNON from 'cannon-es'
+import * as NOISE from 'simplex-noise'
 global.THREE = THREE
 global.GUI = GUI
 global.CANNON = CANNON
+global.NOISE = NOISE
 
 let myThree
 const artFolder = "sketch"
