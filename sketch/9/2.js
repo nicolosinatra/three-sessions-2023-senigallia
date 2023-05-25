@@ -61,11 +61,12 @@ export function sketch() {
         stats.begin() // XXX
 
         // ANIMATION
-        // cube.scale.x = MIC.getVol() * .04
-        // cube.scale.x = MIC.volume * .05
-        cube.scale.x = MIC.mapSound(0, 2, .5, 1)
+        if (typeof MIC != 'undefined') {
+            // cube.scale.x = MIC.getVol() * .04
+            // cube.scale.x = MIC.volume * .05
+            cube.scale.x = MIC.mapSound(0, 2, .5, 1)
+        }
         // ...
-
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
 

@@ -87,16 +87,18 @@ export function sketch() {
         // ANIMATION
         const positions = particles.geometry.attributes.position.array;
         const scales = particles.geometry.attributes.scale.array;
-        let i = 0, j = 0
-        for (let ix = 0; ix < AMOUNTX; ix++) {
-            for (let iy = 0; iy < AMOUNTY; iy++) {
-                const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 200)
-                positions[i + 1] = freqAmplitude
-                scales[j] = 2 + freqAmplitude / 10
-                i += 3
-                j++
+        if (typeof MIC != 'undefined') {
+            let i = 0, j = 0
+            for (let ix = 0; ix < AMOUNTX; ix++) {
+                for (let iy = 0; iy < AMOUNTY; iy++) {
+                    const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 200)
+                    positions[i + 1] = freqAmplitude
+                    scales[j] = 2 + freqAmplitude / 10
+                    i += 3
+                    j++
+                }
             }
-        }
+        } 
         particles.geometry.attributes.position.needsUpdate = true
         particles.geometry.attributes.scale.needsUpdate = true
 
