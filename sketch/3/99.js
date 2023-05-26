@@ -1,4 +1,4 @@
-// Marching cubes + texture
+// Marching cubes
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -8,7 +8,6 @@ import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
 let scene
 let effect
 let material
-let reflectionCube
 let animation
 let onWindowResize
 let controls
@@ -34,21 +33,11 @@ export function sketch() {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    controls = new OrbitControls(camera, renderer.domElement)
+    const controls = new OrbitControls(camera, renderer.domElement)
 
     // SCENE
     scene = new THREE.Scene()
-    // texture
-    const path = './assets/textures/cube/MilkyWay/dark-s_'
-    const format = '.jpg'
-    const urls = [
-        path + 'px' + format, path + 'nx' + format,
-        path + 'py' + format, path + 'ny' + format,
-        path + 'pz' + format, path + 'nz' + format
-    ]
-    const cubeTextureLoader = new THREE.CubeTextureLoader()
-    reflectionCube = cubeTextureLoader.load(urls)
-    material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1 })
+    material = new THREE.MeshStandardMaterial({ color: 0xff0000, roughness: .1, metalness: .9 })
     let resolution = 28;
     // effect
     let effectController = {
@@ -89,10 +78,10 @@ export function sketch() {
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
     scene.add(light)
-    const pointLight = new THREE.PointLight(0x0000ff)
+    const pointLight = new THREE.PointLight(0xff0000)
     pointLight.position.set(0, 0, 100)
     scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0x00faff)
+    const ambientLight = new THREE.AmbientLight(0xfffa00)
     scene.add(ambientLight)
 
     // ANIMATE
@@ -101,7 +90,7 @@ export function sketch() {
 
         // ANIMATION
         const delta = clock.getDelta();
-        time += delta * effectController.speed * 0.5; 
+        time += delta * effectController.speed * 0.5;
         // marching cubes
         if (effectController.resolution !== resolution) {
             resolution = effectController.resolution;
@@ -125,6 +114,5 @@ export function dispose() {
     cancelAnimationFrame(animation)
     controls?.dispose()
     material?.dispose()
-    reflectionCube?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }
