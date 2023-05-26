@@ -1,4 +1,4 @@
-// Marching cubes
+// Marching cubes // prova piccoli blob
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -22,7 +22,7 @@ export function sketch() {
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
-    camera.position.z = 200 // allontanato la camera
+    camera.position.z = 60 // allontanato la camera
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -41,10 +41,10 @@ export function sketch() {
     let resolution = 28;
     // effect
     let effectController = {
-        speed: 0.5,
-        numBlobs: 30,
-        resolution: 80,
-        isolation: 90,
+        speed: .8,
+        numBlobs: 40,
+        resolution: 70,
+        isolation: 80,
         floor: false,
         wallx: false,
         wallz: false,
@@ -75,17 +75,17 @@ export function sketch() {
     }
 
     // NOISE
-    noise3D = NOISE.createNoise3D()
-    const t0 = Math.random() * 10
+    // noise3D = NOISE.createNoise3D()
+    // const t0 = Math.random() * 10
 
     // LIGHTS
-    const light = new THREE.DirectionalLight(0xffffff)
+    const light = new THREE.DirectionalLight(0xffffff, 1)
     light.position.set(0.5, 0.5, 1)
     scene.add(light)
-    const pointLight = new THREE.PointLight(0x0000ff)
+    const pointLight = new THREE.PointLight(0x0000ff, 10, 0)
     pointLight.position.set(0, 0, 100)
     scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0x00faff)
+    const ambientLight = new THREE.AmbientLight(0x00faff, 100)
     scene.add(ambientLight)
 
 
