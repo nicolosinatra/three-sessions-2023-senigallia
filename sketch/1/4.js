@@ -20,18 +20,18 @@ export function sketch() {
 
     const p = {
         // planets 
-        parentScale: 2,
-        childScale: 3,
+        parentScale: 1,
+        childScale: 5,
         parentPos: new THREE.Vector3(-7, 1.5, 0),
-        childPos: new THREE.Vector3(1, 1.5, 0),
-        parentSpeed: .5,
+        childPos: new THREE.Vector3(2, 1.5, 0),
+        parentSpeed: 0,
         childSpeed: 2,
-        parentRotationSpeed: 0.1,
+        parentRotationSpeed: 0.01,
         childLight: true,
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(Math.random() * 30, -5, 20),
-        autoRotate: true,
+        cameraPosition: new THREE.Vector3(Math.random() * 30, -5, -20),
+        autoRotate: false,
         autoRotateSpeed: 1.5,
         camera: 35,
         // world

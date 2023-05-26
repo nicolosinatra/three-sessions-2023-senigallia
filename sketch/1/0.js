@@ -30,12 +30,12 @@ export function sketch() {
         childLight: false,
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(Math.random() * 30, -5, 20),
-        autoRotate: true,
+        cameraPosition: new THREE.Vector3(Math.random() * 20, -5, 20),
+        autoRotate: false,
         autoRotateSpeed: -0.2,
         camera: 35,
         // world
-        floor: -5
+        floor: -5,
     }
 
     // other parameters
@@ -185,7 +185,7 @@ export function sketch() {
 
         // ANIMATION
         if (parent) {
-            const t1 = t * p.parentSpeed 
+            const t1 = t * p.parentSpeed
             parent.position.x = p.parentPos.x + noise3D(0, t1, 0) * .2
             parent.position.y = p.parentPos.y + noise3D(t1 + 4, 0, 0) * .3
             parent.position.z = p.parentPos.z + noise3D(0, 0, t1 + 8) * .1
@@ -199,7 +199,7 @@ export function sketch() {
             if (p.childLight) pointLight.position.copy(child.position)
         }
         // ...
-        
+
         controls.update()
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX

@@ -22,7 +22,6 @@
 // 7 - IMAGES [status: nd]
 // 
 // COMING UP: 
-// - Maybe Easing + Physics
 // - ...
 // - TouchOSC support
 
