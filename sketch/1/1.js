@@ -7,7 +7,7 @@ import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 let scene
 let geometry, groundGeom, parentGeometry
 let material, material2, groundMate
-let reflectionCube, dispMap, diffMap, bumpMap
+let reflectionCube, dispMap
 let animation
 let onWindowResize
 let noise3D
@@ -78,7 +78,7 @@ export function sketch() {
     let child
     material = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        envMap: global.cubeTextures[0].texture,
+        envMap: cubeTextures[0].texture,
         reflectivity: 1.0,
         transmission: 1.0,
         roughness: 0.0,
@@ -109,10 +109,10 @@ export function sketch() {
     })
     mergeVertices(parentGeometry)
     let parent
-    dispMap = global.textures[1].texture
+    dispMap = textures[1].texture
     material2 = new THREE.MeshPhysicalMaterial({
         color: 0x9c9c9c,
-        map: global.textures[0].texture,
+        map: textures[0].texture,
         displacementMap: dispMap,
         displacementScale: 0.2,
         displacementBias: 0.0,
