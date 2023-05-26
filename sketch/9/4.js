@@ -59,7 +59,7 @@ export function sketch() {
         scene.add(sphereMesh)
         const sphereShape = new CANNON.Sphere(r)
         const sphereBody = new CANNON.Body({
-            mass: 1,
+            mass: 50,
             // material: physicsMaterial 
         })
         sphereBody.addShape(sphereShape)
