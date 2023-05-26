@@ -1,17 +1,16 @@
-// Marching cubes 
-//provo a inserire commento, altro commento
+// Marching cubes
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
 
-let renderer
 let scene
 let effect
 let material
 let animation
 let onWindowResize
+let controls
 
 export function sketch() {
     console.log("Sketch launched")
@@ -20,14 +19,6 @@ export function sketch() {
 
     let time = 0
     const clock = new THREE.Clock()
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -42,11 +33,11 @@ export function sketch() {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement)
+    controls = new OrbitControls(camera, renderer.domElement)
 
     // SCENE
     scene = new THREE.Scene()
-    material = new THREE.MeshStandardMaterial({ color: 0xff0000, roughness: .1, metalness: .9 })
+    material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: global.cubeTextures[1].texture, roughness: 0, metalness: 1 })
     let resolution = 28;
     // effect
     let effectController = {
@@ -87,10 +78,10 @@ export function sketch() {
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
     scene.add(light)
-    const pointLight = new THREE.PointLight(0xff0000)
+    const pointLight = new THREE.PointLight(0x0000ff)
     pointLight.position.set(0, 0, 100)
     scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0xfffa00)
+    const ambientLight = new THREE.AmbientLight(0x00faff)
     scene.add(ambientLight)
 
     // ANIMATE
@@ -99,7 +90,7 @@ export function sketch() {
 
         // ANIMATION
         const delta = clock.getDelta();
-        time += delta * effectController.speed * 0.5;
+        time += delta * effectController.speed * 0.5; 
         // marching cubes
         if (effectController.resolution !== resolution) {
             resolution = effectController.resolution;
@@ -121,7 +112,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
+    controls?.dispose()
     material?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }

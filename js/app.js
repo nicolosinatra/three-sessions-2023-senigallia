@@ -29,8 +29,12 @@
 import "./init"
 import * as THREE from 'three'
 import * as GUI from 'dat.gui'
+import * as CANNON from 'cannon-es'
+import * as NOISE from 'simplex-noise'
 global.THREE = THREE
 global.GUI = GUI
+global.CANNON = CANNON
+global.NOISE = NOISE
 
 let myThree
 const artFolder = "sketch"
@@ -45,19 +49,29 @@ const changeSet = (set) => {
 	current_set = set
 	changeSketch(0)
 }
+const isSketchValid = (url) => {
+	const http = new XMLHttpRequest()
+	http.open('HEAD', url, false)
+	http.send()
+	return http.status == 200
+}
 const changeSketch = (sketch) => {
-	current_sketch = sketch
-	const loc = current_set + '/' + current_sketch
+	sketch
+	const loc = current_set + '/' + sketch
 	const sketchName = loc + '.js'
-	loadSketch(sketchName)
-	document.location.hash = loc
+	if (isSketchValid(`../sketch/${sketchName}`)) {
+		current_sketch = sketch
+		loadSketch(sketchName)
+		console.log('Loading Sketch: ' + sketchName)
+		document.location.hash = loc
+	}
 }
 const loadSketch = async (sketchName) => {
 	if (myThree?.dispose()) {
 		myThree.dispose()
 		myThree = {}
 	}
-	canvas3D.replaceChildren()
+	// canvas3D.replaceChildren()
 	myThree = await import(`../sketch/${sketchName}`)
 	myThree.sketch() // LET'S ROCK
 }
@@ -231,7 +245,7 @@ const onKeyDown = (event) => {
 		changeSet(keyCode - 48)
 	} else if (keyCode == 220) toggleMouse() // \
 	else if (keyCode == 117) toggleFullscreen() // F6
-	else if (keyCode == 222) initAudio() // 
+	else if (keyCode == 222) initAudio() // (shift) + ?
 }
 window.addEventListener('keydown', function (e) {
 	if (typeof onKeyDown == 'function') onKeyDown(e);
@@ -252,10 +266,58 @@ const toggleFullscreen = () => {
 	}
 }
 
+// TEXTURES PRELOAD
+THREE.Cache.enabled = true
+global.cubeTextures = []
+const loadCubeTexture = (name, path, format) => {
+	const urls = [
+		path + 'px' + format, path + 'nx' + format,
+		path + 'py' + format, path + 'ny' + format,
+		path + 'pz' + format, path + 'nz' + format
+	]
+	const cubeTextureLoader = new THREE.CubeTextureLoader()
+	global.cubeTextures.push({
+		name: name,
+		texture: cubeTextureLoader.load(urls, (cube) => {
+			console.log('loadedCubeTexture' + cube)
+		})
+	})
+}
+global.textures = []
+const loadTexture = (name, path, format) => {
+	const textureLoader = new THREE.TextureLoader()
+	const url = path + format
+	global.textures.push({
+		name: name,
+		texture: textureLoader.load(url, (texture) => {
+			console.log('loadedTexture' + texture)
+		})
+	})
+}
+// Let's preload our textures
+// global.cubeTextures[n]
+loadCubeTexture('PureSky', '/assets/textures/cube/PureSky-256/', '.png') // 0
+loadCubeTexture('MilkyWay', '/assets/textures/cube/MilkyWay/dark-s_', '.jpg') // 1
+// global.textures[n]
+loadTexture('StoneDiff', '/assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
+loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
+
+
 // INIT
 const init = () => {
 	window.document.body.style.cursor = 'none'
-	changeSketch(0)
+	changeSet(1)
+	// RENDERER
+	global.renderer = new THREE.WebGLRenderer({
+		alpha: true,
+		antialias: true
+	})
+	renderer.shadowMap.enabled = true // < Shadows enabled
+	renderer.shadowMap.Type = THREE.PCFShadowMap // BasicShadowMap | PCFShadowMap | PCFSoftShadowMap | THREE.VSMShadowMap
+	renderer.toneMapping = THREE.ACESFilmicToneMapping
+	renderer.toneMappingExposure = 1.2
+	renderer.setSize(window.innerWidth, window.innerHeight)
+	canvas3D.appendChild(renderer.domElement)
 	// setTimeout(() => {
 	// 	toggleFullscreen();
 	//   }, 5000);
