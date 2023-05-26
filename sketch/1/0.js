@@ -185,10 +185,10 @@ export function sketch() {
 
         // ANIMATION
         if (parent) {
-            const t1 = t * p.parentSpeed
-            parent.position.x = p.parentPos.x + noise3D(0, t, 0) * .2
-            parent.position.y = p.parentPos.y + noise3D(t + 4, 0, 0) * .3
-            parent.position.z = p.parentPos.z + noise3D(0, 0, t + 8) * .1
+            const t1 = t * p.parentSpeed 
+            parent.position.x = p.parentPos.x + noise3D(0, t1, 0) * .2
+            parent.position.y = p.parentPos.y + noise3D(t1 + 4, 0, 0) * .3
+            parent.position.z = p.parentPos.z + noise3D(0, 0, t1 + 8) * .1
             parent.rotation.y += noise3D(0, 0, t + 10) * p.parentRotationSpeed
         }
         if (child) {
