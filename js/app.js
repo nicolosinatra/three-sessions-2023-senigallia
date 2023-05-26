@@ -61,7 +61,7 @@ const loadSketch = async (sketchName) => {
 		myThree.dispose()
 		myThree = {}
 	}
-	canvas3D.replaceChildren()
+	// canvas3D.replaceChildren()
 	myThree = await import(`../sketch/${sketchName}`)
 	myThree.sketch() // LET'S ROCK
 }
@@ -256,10 +256,56 @@ const toggleFullscreen = () => {
 	}
 }
 
+// texture loaders
+THREE.Cache.enabled = true
+global.cubeTextures = []
+const loadCubeTexture = (name, path, format) => {
+	const urls = [
+		path + 'px' + format, path + 'nx' + format,
+		path + 'py' + format, path + 'ny' + format,
+		path + 'pz' + format, path + 'nz' + format
+	]
+	const cubeTextureLoader = new THREE.CubeTextureLoader()
+	global.cubeTextures.push({
+		name: name,
+		texture: cubeTextureLoader.load(urls, (cube) => {
+			console.log('loadedCubeTexture' + cube)
+		})
+	})
+}
+global.textures = []
+const loadTexture = (name, path, format) => {
+	const textureLoader = new THREE.TextureLoader()
+	const url = path + format
+	global.textures.push({
+		name: name,
+		texture: textureLoader.load(url, (texture) => {
+			console.log('loadedTexture' + texture)
+		})
+	})
+}
+// cube textures
+loadCubeTexture('PureSky', '/assets/textures/cube/PureSky-256/', '.png') // 0
+// textures
+loadTexture('StoneDiff', '/assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
+loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
+
+
 // INIT
 const init = () => {
 	window.document.body.style.cursor = 'none'
 	changeSet(1)
+	// RENDERER
+	global.renderer = new THREE.WebGLRenderer({
+		alpha: true,
+		antialias: true
+	})
+	renderer.shadowMap.enabled = true // < Shadows enabled
+	renderer.shadowMap.Type = THREE.PCFShadowMap // BasicShadowMap | PCFShadowMap | PCFSoftShadowMap | THREE.VSMShadowMap
+	renderer.toneMapping = THREE.ACESFilmicToneMapping
+	renderer.toneMappingExposure = 1.2
+	renderer.setSize(window.innerWidth, window.innerHeight)
+	canvas3D.appendChild(renderer.domElement)
 	// setTimeout(() => {
 	// 	toggleFullscreen();
 	//   }, 5000);

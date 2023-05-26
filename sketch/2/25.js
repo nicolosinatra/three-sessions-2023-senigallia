@@ -3,7 +3,6 @@
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 
-let renderer
 let geometry
 let material
 let animation
@@ -14,19 +13,12 @@ let colonna3 = []
 let colonna4 = []
 let colonna5 = []
 let pensatoio = []
+let controls
 
 export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -87,7 +79,7 @@ export function sketch() {
         dodecaedro2,
         dodecaedro
     );
-    console.log(colonna1); 
+    // console.log(colonna1); 
 
     colonna2.push(
         cubo,
@@ -102,7 +94,7 @@ export function sketch() {
         dodecaedro2,
         cubo2
     );
-    console.log(colonna2);
+    // console.log(colonna2);
 
     colonna3.push(
         dodecaedro,
@@ -117,7 +109,7 @@ export function sketch() {
         dodecaedro2,
         cubo,
     );
-    console.log(colonna3);
+    // console.log(colonna3);
 
     colonna4.push(
         cubo2,
@@ -132,7 +124,7 @@ export function sketch() {
         dodecaedro2,
         dodecaedro,
     );
-    console.log(colonna4);
+    // console.log(colonna4);
 
     colonna5.push(
         cubo,
@@ -147,7 +139,7 @@ export function sketch() {
         cubo2,
         dodecaedro,
     );
-    console.log(colonna5);
+    // console.log(colonna5);
 
     pensatoio.push(
         colonna1,
@@ -157,11 +149,11 @@ export function sketch() {
         colonna5
     );
 
-    console.log(pensatoio);
-    console.log("pensatoio caricato!");
+    // console.log(pensatoio);
+    // console.log("pensatoio caricato!");
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement,scene.userData.camera, scene.userData.element);
+    controls = new OrbitControls(camera, renderer.domElement);
 	controls.minDistance = 2;
 	controls.maxDistance = 5;
 	controls.enablePan = false;
@@ -212,7 +204,7 @@ function addShadowedLight( x, y, z, color, intensity ) {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
+    controls?.dispose()
     geometry?.dispose()
     material?.dispose()
     window.removeEventListener('resize', onWindowResize)

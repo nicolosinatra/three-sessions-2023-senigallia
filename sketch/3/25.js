@@ -8,13 +8,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
 import { PerspectiveCamera } from 'three';
 
-let renderer
 let scene
 let material
 let effect
 let reflectionCube
 let animation
 let onWindowResize
+let controls
 
 let effectController // per GUI
 let attractorController // test GUI per attrattore 
@@ -28,14 +28,6 @@ export function sketch() {
 
     let time = 0
     const clock = new THREE.Clock()
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     
     // CAMERA
@@ -52,7 +44,7 @@ export function sketch() {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement)
+    controls = new OrbitControls(camera, renderer.domElement)
     // controls.minDistance = 30;
 	// controls.maxDistance = 30; // può essere che ci servano per bloccare la camera
 
@@ -208,7 +200,7 @@ export function sketch() {
             pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
             pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
             attractor.position.set(pointer.x*40, pointer.y*25, 0 )
-            console.log(pointer);
+            // console.log(pointer);
         }
         // update the picking ray with the camera and pointer position
         raycaster.setFromCamera( pointer, camera );
@@ -256,7 +248,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
+    controls.dispose()
     material.dispose()
     window.removeEventListener('resize', onWindowResize)
 }

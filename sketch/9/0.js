@@ -7,7 +7,6 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js'
 
-let renderer
 let geometry
 let material
 let animation
@@ -16,19 +15,12 @@ let composer
 let renderPass
 let glitchPass
 let gui
+let controls
 
 export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -43,7 +35,7 @@ export function sketch() {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
 
     // SCENE
     const scene = new THREE.Scene()
@@ -90,7 +82,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
+    controls?.dispose()
     composer?.dispose()
     renderPass?.dispose()
     glitchPass?.dispose()

@@ -1,28 +1,20 @@
-// Particles grid + Shader + MIC 
+// Particles grid + Shader + MIC lines
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-let renderer
 let scene
 let material
 let geometry
 let particles
 let animation
 let onWindowResize
+let controls
 
 export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
@@ -37,7 +29,7 @@ export function sketch() {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement)
+    controls = new OrbitControls(camera, renderer.domElement)
 
     // SCENE
     scene = new THREE.Scene()
@@ -112,7 +104,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
+    controls?.dispose()
     geometry?.dispose()
     material?.dispose()
     window.removeEventListener('resize', onWindowResize)

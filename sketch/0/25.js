@@ -23,10 +23,6 @@ function play() {
     camera.position.set(0,0,300);
     camera.lookAt(scene.position);
     scene.add(camera);
-
-    var renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
     
 
     var icosahedronGeometry = new THREE.IcosahedronGeometry(0.1, 4); //(radius, details)
@@ -50,10 +46,6 @@ function play() {
     scene.add(spotLight);
     
     scene.add(group);
-
-    document.getElementById('out').appendChild(renderer.domElement);
-
-    window.addEventListener('resize', onWindowResize, false);
 
     render();
 

@@ -1,9 +1,8 @@
-// Particles grid + Shader + MIC
+// Particles grid + Shader + MIC points
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-let renderer
 let scene
 let material
 let geometry
@@ -15,14 +14,6 @@ export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
@@ -112,7 +103,6 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
     geometry?.dispose()
     material?.dispose()
     window.removeEventListener('resize', onWindowResize)

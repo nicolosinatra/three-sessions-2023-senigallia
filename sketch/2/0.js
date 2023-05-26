@@ -2,10 +2,7 @@
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { degToRad } from 'three/src/math/MathUtils'
 
-let renderer
-let geometry
 let geometryPlane
 let material
 let animation
@@ -13,21 +10,13 @@ let onWindowResize
 let world
 let pieceBody
 let pieceGeometry
+let controls
 const pieceMaterials = []
 
 export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true,
-    })
-    renderer.shadowMap.enabled = true
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -154,7 +143,7 @@ export function sketch() {
     scene.add(ambientLight)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement)
+    controls = new OrbitControls(camera, renderer.domElement)
     controls.target.y = 2.5
     controls.update()
 
@@ -196,8 +185,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
-    renderer?.forceContextLoss()
+    controls?.dispose()
     geometryPlane?.dispose()
     pieceGeometry?.dispose()
     material?.dispose()

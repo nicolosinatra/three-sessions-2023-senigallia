@@ -2,7 +2,6 @@
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-let renderer
 let scene
 let geometry
 let groundGeom
@@ -15,6 +14,7 @@ let diffMap
 let animation
 let onWindowResize
 let noise3D
+let controls
 
 export function sketch() {
     console.log("Sketch launched")
@@ -23,16 +23,6 @@ export function sketch() {
 
     let near = 10, far = 1000, floor = -5
     let shadowMapWidth = 2048, shadowMapHeight = 2048
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.shadowMap.enabled = true; // < Shadows enabled
-    renderer.shadowMap.Type = THREE.PCFShadowMap // BasicShadowMap | PCFShadowMap | PCFSoftShadowMap | THREE.VSMShadowMap
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.2, far)
@@ -47,7 +37,7 @@ export function sketch() {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement)
+    controls = new OrbitControls(camera, renderer.domElement)
 
     // SCENE
     scene = new THREE.Scene()
@@ -177,7 +167,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
+    controls?.dispose()
     geometry?.dispose()
     groundGeom?.dispose()
     material?.dispose()

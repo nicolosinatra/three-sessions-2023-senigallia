@@ -2,28 +2,18 @@
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { Vec3 } from 'cannon-es'
 
-let renderer
 let geometry
 let material
 let animation
 let onWindowResize
 let world
-let body
+let controls
 
 export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -85,7 +75,7 @@ export function sketch() {
     }
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
 
     // ANIMATE
     let clock = new THREE.Clock()
@@ -124,10 +114,10 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer?.dispose()
+    // we need to dispose all the bodies... XXX
+    controls?.dispose()
     geometry?.dispose()
     material?.dispose()
-    body = null
     world = null
     window?.removeEventListener('resize', onWindowResize)
 }
