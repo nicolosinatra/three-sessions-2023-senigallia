@@ -266,7 +266,7 @@ const toggleFullscreen = () => {
 	}
 }
 
-// texture loaders
+// TEXTURES PRELOAD
 THREE.Cache.enabled = true
 global.cubeTextures = []
 const loadCubeTexture = (name, path, format) => {
@@ -294,9 +294,11 @@ const loadTexture = (name, path, format) => {
 		})
 	})
 }
-// cube textures
+// Let's preload our textures
+// global.cubeTextures[n]
 loadCubeTexture('PureSky', '/assets/textures/cube/PureSky-256/', '.png') // 0
-// textures
+loadCubeTexture('MilkyWay', '/assets/textures/cube/MilkyWay/dark-s_', '.jpg') // 1
+// global.textures[n]
 loadTexture('StoneDiff', '/assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
 loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
 
