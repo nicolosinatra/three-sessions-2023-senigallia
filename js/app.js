@@ -49,12 +49,22 @@ const changeSet = (set) => {
 	current_set = set
 	changeSketch(0)
 }
+const isSketchValid = (url) => {
+	const http = new XMLHttpRequest()
+	http.open('HEAD', url, false)
+	http.send()
+	return http.status == 200
+}
 const changeSketch = (sketch) => {
-	current_sketch = sketch
-	const loc = current_set + '/' + current_sketch
+	sketch
+	const loc = current_set + '/' + sketch
 	const sketchName = loc + '.js'
-	loadSketch(sketchName)
-	document.location.hash = loc
+	if (isSketchValid(`../sketch/${sketchName}`)) {
+		current_sketch = sketch
+		loadSketch(sketchName)
+		console.log('Loading Sketch: ' + sketchName)
+		document.location.hash = loc
+	}
 }
 const loadSketch = async (sketchName) => {
 	if (myThree?.dispose()) {
