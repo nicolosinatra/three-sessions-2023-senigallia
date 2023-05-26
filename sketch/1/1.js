@@ -20,19 +20,19 @@ export function sketch() {
 
     const p = {
         // planets 
-        parentScale: 3,
-        childScale: 1,
+        parentScale: 4,
+        childScale: .7,
         parentPos: new THREE.Vector3(-3, 1.5, 0),
         childPos: new THREE.Vector3(6, 1.5, 0),
         parentSpeed: 1,
-        childSpeed: 1,
-        parentRotationSpeed: 0.002,
-        childLight: false,
+        childSpeed: 4,
+        parentRotationSpeed: 0.005,
+        childLight: true,
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
         cameraPosition: new THREE.Vector3(Math.random() * 30, -5, 20),
-        autoRotate: true,
-        autoRotateSpeed: -0.2,
+        autoRotate: false,
+        autoRotateSpeed: -0.5,
         camera: 35,
         // world
         floor: -5
@@ -199,7 +199,7 @@ export function sketch() {
             if (p.childLight) pointLight.position.copy(child.position)
         }
         // ...
-        
+
         controls.update()
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
