@@ -302,7 +302,6 @@ loadCubeTexture('MilkyWay', '/assets/textures/cube/MilkyWay/dark-s_', '.jpg') //
 loadTexture('StoneDiff', '/assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
 loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
 
-
 // INIT
 const init = () => {
 	window.document.body.style.cursor = 'none'

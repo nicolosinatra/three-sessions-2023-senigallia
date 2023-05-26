@@ -41,6 +41,7 @@ export function sketch() {
         gravity: new CANNON.Vec3(0, -8.9, 0)
     })
     // Default material
+
     const defaultMaterial = new CANNON.Material('default')
     const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
         friction: .9,
