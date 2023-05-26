@@ -20,22 +20,22 @@ export function sketch() {
 
     const p = {
         // planets 
-        parentScale: 1,
+        parentScale: .5,
         childScale: 6,
         parentPos: new THREE.Vector3(-7, -1, 0),
         childPos: new THREE.Vector3(2, 2, 0),
         parentSpeed: .5,
-        childSpeed: 3,
-        parentRotationSpeed: 0.01,
+        childSpeed: 5,
+        parentRotationSpeed: 0.05,
         childLight: true,
         // view
         lookAtCenter: new THREE.Vector3(0, 2, 0),
-        cameraPosition: new THREE.Vector3(-10, -5, 2),
+        cameraPosition: new THREE.Vector3(-15, -5, 5),
         autoRotate: false,
         autoRotateSpeed: 1.5,
         camera: 35,
         // world
-        floor: -7
+        floor: -10
     }
 
     // other parameters
