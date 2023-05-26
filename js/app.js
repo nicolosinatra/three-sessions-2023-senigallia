@@ -301,6 +301,7 @@ loadCubeTexture('MilkyWay', '/assets/textures/cube/MilkyWay/dark-s_', '.jpg') //
 loadTexture('StoneDiff', '/assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
 loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
 
+loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 2
 
 // INIT
 const init = () => {
