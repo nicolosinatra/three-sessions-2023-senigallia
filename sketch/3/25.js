@@ -2,7 +2,6 @@
 
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
@@ -15,6 +14,7 @@ let reflectionCube
 let animation
 let onWindowResize
 let controls
+let gui
 
 let effectController // per GUI
 let attractorController // test GUI per attrattore 
@@ -49,7 +49,8 @@ export function sketch() {
 	// controls.maxDistance = 30; // può essere che ci servano per bloccare la camera
 
     // GUI
-    setupGui();
+    gui = new GUI.GUI()
+    setupGui()
     
     // SCENE
     scene = new THREE.Scene()
@@ -104,36 +105,34 @@ export function sketch() {
             dummy: function () { }
         }
         
-        let h;
-    
-        const gui = new GUI();
-    
+ 
         // simulation
-        h = gui.addFolder( 'Simulation' );
+        const simulationFolder = gui.addFolder( 'Simulation' );
        
         //test attractor 
         /* h.add( attractorController, 'attractor_x', -10, 10, 0.05);
         h.add( attractorController, 'attractor_y', -10, 10, 0.05);
         h.add( attractorController, 'attractor_z', -10, 10, 0.05); */
 
-        h.add( effectController, 'dx', -10, 10, 0.05);
-        h.add( effectController, 'sx', -10, 10, 0.05);
-        h.add( effectController, 'sy', -10, 10, 0.05);
-        h.add( effectController, 'sz', -10, 10, 0.05);
-        h.add( effectController, 'speed', 0.1, 8.0, 0.05 );
-        h.add( effectController, 'numBlobs', 1, 50, 1 );
-        h.add( effectController, 'resolution', 14, 100, 1 );
-        h.add( effectController, 'isolation', 10, 300, 1 );
-    
-        h.add( effectController, 'floor' );
-        h.add( effectController, 'wallx' );
-        h.add( effectController, 'wallz' );
+        simulationFolder.add( effectController, 'dx', -10, 10, 0.05)
+        simulationFolder.add( effectController, 'sx', -10, 10, 0.05)
+        simulationFolder.add( effectController, 'sy', -10, 10, 0.05)
+        simulationFolder.add( effectController, 'sz', -10, 10, 0.05)
+        simulationFolder.add( effectController, 'speed', 0.1, 8.0, 0.05 )
+        simulationFolder.add( effectController, 'numBlobs', 1, 50, 1 )
+        simulationFolder.add( effectController, 'resolution', 14, 100, 1 )
+        simulationFolder.add( effectController, 'isolation', 10, 300, 1 )
+        simulationFolder.add( effectController, 'floor' )
+        simulationFolder.add( effectController, 'wallx' )
+        simulationFolder.add( effectController, 'wallz' )
+        simulationFolder.open()
 
         // camera
-        h = gui.addFolder( 'Camera' );
-        h.add( camera.position , 'x', -500, 500, 0.05 );
-        h.add( camera.position , 'y', -500, 500, 0.05 );
-        h.add( camera.position , 'z', -500, 500, 0.05 );
+        const cameraFolder = gui.addFolder( 'Camera' )
+        cameraFolder.add( camera.position , 'x', -500, 500, 0.05 )
+        cameraFolder.add( camera.position , 'y', -500, 500, 0.05 )
+        cameraFolder.add( camera.position , 'z', -500, 500, 0.05 )
+        cameraFolder.open()
 
         // material (type)
         /* h = gui.addFolder( 'Materials' );
@@ -248,6 +247,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    gui.destroy()
     controls.dispose()
     material.dispose()
     window.removeEventListener('resize', onWindowResize)
