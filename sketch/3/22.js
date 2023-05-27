@@ -1,4 +1,4 @@
-// Marching cubes
+// clouds at the top of the screen
 
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
@@ -17,8 +17,6 @@ let noise3D
 let controls
 let gui
 
-let effectController // per GUI
-
 
 
 export function sketch() {
@@ -28,17 +26,31 @@ export function sketch() {
 
     const c = {
         // clouds 
-        
+        dimBlob: 0.4 + Math.random(),
+        speedRotazione: 0.005, 
+        sx: 0.2,
+        sy: 0.2,
+        sz: 0.2,
+        speed: 0.02,
+        numBlobs: 40 + Math.random() * 50, 
+        resolution: 80, 
+        isolation: 120, 
+        wireframe: false,
+        //dummy: function () { }
+
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(0, -10, 50),
+        cameraPosition: new THREE.Vector3(0, -15, 50),
         autoRotate: true,
         autoRotateSpeed: -1,
         camera: 35,
         near: 0.1,
         far: 1000,
+
         // world
-        floor: -5
+        floor: false,
+        wallx: false,
+        wallz: false,
     }
 
     let time = 0
@@ -67,42 +79,29 @@ export function sketch() {
     setupGui()
 
     function setupGui() {
-        // effect
-        effectController = {
-            s: 0.4 + Math.random(),
-            sx: 0,
-            sy: 0.5,
-            sz: 0.5,
-            speed: 0.02,
-            numBlobs: 40 + Math.random() * 50, 
-            resolution: 90, 
-            isolation: 120, 
-            floor: false,
-            wallx: false,
-            wallz: false,
-            //dummy: function () { }
-        }
  
         // simulation
         const simulationFolder = gui.addFolder( 'Simulation' );
 
-        simulationFolder.add( effectController, 's', -2, 2, 0.05)
-        simulationFolder.add( effectController, 'sx', 0, 1, 0.05)
-        simulationFolder.add( effectController, 'sy', 0, 1, 0.05)
-        simulationFolder.add( effectController, 'sz', 0, 1, 0.05)
-        simulationFolder.add( effectController, 'speed', 0.01, 2, 0.01 )
-        simulationFolder.add( effectController, 'numBlobs', 1, 100, 1 )
-        simulationFolder.add( effectController, 'resolution', 14, 100, 1 )
-        simulationFolder.add( effectController, 'isolation', 10, 300, 1 )
-        simulationFolder.add( effectController, 'floor' )
-        simulationFolder.add( effectController, 'wallx' )
-        simulationFolder.add( effectController, 'wallz' )
+        simulationFolder.add( c, 'dimBlob', 0.01, 2, 0.01)
+        simulationFolder.add( c, 'speedRotazione', 0.01, 2, 0.01 )
+        simulationFolder.add( c, 'sx', 0.01, 1, 0.01)
+        simulationFolder.add( c, 'sy', -1, 1, 0.01)
+        simulationFolder.add( c, 'sz', 0.01, 1, 0.01)
+        simulationFolder.add( c, 'speed', 0.01, 2, 0.01 )
+        simulationFolder.add( c, 'numBlobs', 1, 100, 1 )
+        simulationFolder.add( c, 'resolution', 10, 100, 1 )
+        simulationFolder.add( c, 'isolation', 10, 300, 1 )
+        simulationFolder.add( c, 'wireframe' )
+        simulationFolder.add( c, 'floor' )
+        simulationFolder.add( c, 'wallx' )
+        simulationFolder.add( c, 'wallz' )
         simulationFolder.open()
 
         // camera
         const cameraFolder = gui.addFolder( 'Camera' )
-        cameraFolder.add( camera.position , 'x', -500, 500, 0.05 )
-        cameraFolder.add( camera.position , 'y', -500, 500, 0.05 )
+        cameraFolder.add( camera.position , 'x', 0, 1, 0.05 )
+        cameraFolder.add( camera.position , 'y', -15, 10, 0.05 )
         cameraFolder.add( camera.position , 'z', 20, 150, 0.05 )
         cameraFolder.open()
     }
@@ -111,7 +110,7 @@ export function sketch() {
     scene = new THREE.Scene()
 
     // TEXTURE
-    material = new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 1, metalness: 1 })
+    material = new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe })
     // material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1, wireframe: true }) // versione wireframe
 
     let resolution = 32; 
@@ -124,23 +123,22 @@ export function sketch() {
     scene.add(effect)
     
     // this controls content of marching cubes voxel field
-    function updateCubes(object, time, numblobs, s, floor, wallx, wallz) {
+    function updateCubes(object, time, numblobs, dimBlob, sx, sy, sz, floor, wallx, wallz) {
         object.reset()
         // fill the field with some metaballs
         const subtract = 12 // a cosa serve?
-        const strength = s / ((Math.sqrt(numblobs) - 1) / 4 + 1) // dimensione delle sfere (dipende da quanti blob ci sono in scena)
+        const strength = dimBlob / ((Math.sqrt(numblobs) - 1) / 4 + 1) // dimensione delle sfere (dipende da quanti blob ci sono in scena)
         // const column = row /2
 
         for (let i = 0; i < numblobs; i++) {
-            const ballx = 0.5 + (Math.sin(i * time * (Math.cos(i)))) * 0.2
-            const bally = 0.5 + (Math.abs(Math.cos(i * time * Math.cos(i)))) * 0.1 // dip into the floor
-            const ballz = 0.5 + (Math.cos(i * time * Math.sin((i)))) * 0.2
+            const ballx = 0.5 + (Math.sin(i * time * (Math.cos(i)))) * sx
+            const bally = 0.5 + (Math.abs(Math.cos(i * time * Math.cos(i)))) * sy // dip into the floor
+            const ballz = 0.5 + (Math.cos(i * time * Math.sin((i)))) * sz
             object.addBall(ballx, bally, ballz, strength, subtract)
         }
         if (floor) object.addPlaneY(2, 12)
         if (wallz) object.addPlaneZ(2, 12)
         if (wallx) object.addPlaneX(2, 12)
-
         object.update()
     }
     
@@ -148,7 +146,7 @@ export function sketch() {
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
     scene.add(light) 
-    const pointLight = new THREE.PointLight(0xffffff)
+    const pointLight = new THREE.PointLight(0x4287f5)
     pointLight.position.set(0, 0, 100)
     scene.add(pointLight) 
     const ambientLight = new THREE.AmbientLight(0xffffff)
@@ -164,21 +162,24 @@ export function sketch() {
 
         // ANIMATION
         const delta = clock.getDelta();
-        time += delta * effectController.speed * 0.2;
+        time += delta * c.speed * 0.2;
 
         const t = t0 + 0.0001 // performance.now() * 0.0001
 
-        effect.rotation.y += noise3D(0, 0, t + 10) * 0.01
+        effect.rotation.y += noise3D(0, 0, t + 10) * c.speedRotazione
+        pointLight.position.x = pointLight.position.x + noise3D(0, t, 0) * .002
+        pointLight.position.y = pointLight.position.y + noise3D(t + 4, 0, 0) * .003
+        pointLight.position.z = pointLight.position.z + noise3D(0, 0, t + 8) * .001
 
         // marching cubes
-        if (effectController.resolution !== resolution) {
-            resolution = effectController.resolution;
+        if (c.resolution !== resolution) {
+            resolution = c.resolution;
             effect.init(Math.floor(resolution));
         }
-        if (effectController.isolation !== effect.isolation) {
-            effect.isolation = effectController.isolation;
+        if (c.isolation !== effect.isolation) {
+            effect.isolation = c.isolation;
         }
-        updateCubes(effect, time, effectController.numBlobs, effectController.s, effectController.floor, effectController.wallx, effectController.wallz);
+        updateCubes(effect, time, c.numBlobs, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz);
         
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
