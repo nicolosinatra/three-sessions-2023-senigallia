@@ -30,7 +30,7 @@ export function sketch() {
         childLight: false,
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(Math.random() * 20, -5, 20),
+        cameraPosition: new THREE.Vector3(Math.random() * -2, -5, 1),
         autoRotate: false,
         autoRotateSpeed: -0.2,
         camera: 35,

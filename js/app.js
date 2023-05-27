@@ -22,7 +22,6 @@
 // 7 - IMAGES [status: nd]
 // 
 // COMING UP: 
-// - Maybe Easing + Physics
 // - ...
 // - TouchOSC support
 
@@ -305,6 +304,7 @@ loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
 loadTexture('Facce_colori', '/assets/textures/Mosaico_facce_colori', '.jpg') // 2
 loadTexture('Facce_bk', '/assets/textures/Mosaico_facce_bk', '.jpg') // 3
 
+loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 2
 
 // INIT
 const init = () => {
