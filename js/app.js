@@ -22,7 +22,6 @@
 // 7 - IMAGES [status: nd]
 // 
 // COMING UP: 
-// - Maybe Easing + Physics
 // - ...
 // - TouchOSC support
 
@@ -59,12 +58,12 @@ const changeSketch = (sketch) => {
 	sketch
 	const loc = current_set + '/' + sketch
 	const sketchName = loc + '.js'
-	if (isSketchValid(`../sketch/${sketchName}`)) {
+	// if (isSketchValid(`../sketch/${sketchName}`)) { // <<< enable locally to avoid stops on empty sketches
 		current_sketch = sketch
 		loadSketch(sketchName)
 		console.log('Loading Sketch: ' + sketchName)
 		document.location.hash = loc
-	}
+	// }
 }
 const loadSketch = async (sketchName) => {
 	if (myThree?.dispose()) {
@@ -296,12 +295,13 @@ const loadTexture = (name, path, format) => {
 }
 // Let's preload our textures
 // global.cubeTextures[n]
-loadCubeTexture('PureSky', '/assets/textures/cube/PureSky-256/', '.png') // 0
-loadCubeTexture('MilkyWay', '/assets/textures/cube/MilkyWay/dark-s_', '.jpg') // 1
+loadCubeTexture('PureSky', './assets/textures/cube/PureSky-256/', '.png') // 0
+loadCubeTexture('MilkyWay', './assets/textures/cube/MilkyWay/dark-s_', '.jpg') // 1
 // global.textures[n]
-loadTexture('StoneDiff', '/assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
-loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
+loadTexture('StoneDiff', './assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
+loadTexture('StoneDisp', './assets/textures/stone_tiles_02_disp_4k', '.png') // 1
 
+loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 2
 
 // INIT
 const init = () => {
