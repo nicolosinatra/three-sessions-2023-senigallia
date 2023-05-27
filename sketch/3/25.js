@@ -1,4 +1,4 @@
-// Marching cubes
+// clouds at the top of the screen
 
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
@@ -8,16 +8,14 @@ import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
 import { PerspectiveCamera } from 'three';
 
 let scene
-let material
+let material, current_material
+let reflectionCube, dispMap, diffMap, bumpMap
 let effect
-let reflectionCube
 let animation
 let onWindowResize
+let noise3D
 let controls
 let gui
-
-let effectController // per GUI
-let attractorController // test GUI per attrattore 
 
 
 
@@ -26,14 +24,61 @@ export function sketch() {
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
+    const c = {
+        // clouds 
+        dimBlob: 0.4 + Math.random(),
+        speedRotazione: 0.005, 
+        sx: 0.2,
+        sy: 0.2,
+        sz: 0.2,
+        speed: 0.02,
+        numBlobs: 40 + Math.random() * 50, 
+        resolution: 80, 
+        isolation: 120, 
+        wireframe: false,
+        //dummy: function () { }
+
+        //materials
+        material: 'sky',
+
+        // view
+        lookAtCenter: new THREE.Vector3(0, 1, 0),
+        cameraPosition: new THREE.Vector3(0, -15, 50),
+        autoRotate: true,
+        autoRotateSpeed: -1,
+        camera: 35,
+        near: 0.1,
+        far: 1000,
+
+        // world
+        floor: false,
+        wallx: false,
+        wallz: false,
+    }
+
+    // MATERIALI   
+
+    // material = c.material
+    // material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1, wireframe: true }) // versione wireframe
+
+    current_material = 'sky';
+    dispMap = global.textures[2].texture
+    const materials = {
+        'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
+        'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide}),
+		'teatro': new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe } ),
+        'Facce_colori': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.textures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
+    };
+    dispMap.wrapS = dispMap.wrapT = THREE.RepeatWrapping
+    dispMap.repeat.set(1, 1)
+
     let time = 0
     const clock = new THREE.Clock()
-
     
     // CAMERA
-    let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000) // era 75, window.innerWidth / window.innerHeight, 0.1, 1000
-    camera.position.y = 0
-    camera.position.z = 70 // era 50
+    let camera = new THREE.PerspectiveCamera(c.camera, window.innerWidth / window.innerHeight, c.near, c.far)
+    camera.position.copy(c.cameraPosition)
+    camera.lookAt(c.lookAtCenter)
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -46,183 +91,130 @@ export function sketch() {
     // CONTROLS
     controls = new OrbitControls(camera, renderer.domElement)
     // controls.minDistance = 30;
-	// controls.maxDistance = 30; // può essere che ci servano per bloccare la camera
+	// controls.maxDistance = 30;
 
     // GUI
     gui = new GUI.GUI()
     setupGui()
+
+    function setupGui() {
+ 
+        // simulation
+        const simulationFolder = gui.addFolder( 'Simulation' );
+
+        simulationFolder.add( c, 'dimBlob', 0.01, 2, 0.01)
+        simulationFolder.add( c, 'speedRotazione', 0.01, 2, 0.01 )
+        simulationFolder.add( c, 'sx', 0.01, 1, 0.01)
+        simulationFolder.add( c, 'sy', -1, 1, 0.01)
+        simulationFolder.add( c, 'sz', 0.01, 1, 0.01)
+        simulationFolder.add( c, 'speed', 0.01, 2, 0.01 )
+        simulationFolder.add( c, 'numBlobs', 1, 100, 1 )
+        simulationFolder.add( c, 'resolution', 10, 100, 1 )
+        simulationFolder.add( c, 'isolation', 10, 300, 1 )
+        simulationFolder.add( c, 'floor' )
+        simulationFolder.add( c, 'wallx' )
+        simulationFolder.add( c, 'wallz' )
+        simulationFolder.open()
+
+        // material
+        const createHandler = function ( id ) {
+
+            return function () {
+                current_material = id;
+                effect.material = materials[ id ];
+                // effect.enableUvs = ( current_material === 'textured' ) ? true : false;
+				// effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
+            };
+
+        };
+        const materialFolder = gui.addFolder( 'Materials' );
+
+			for ( const m in materials ) {
+
+				c [ m ] = createHandler( m );
+				materialFolder.add( c, m ).name( m );
+			}
+            materialFolder.add( c, 'wireframe' )
+            console.log(c.wireframe)
+
+        // camera
+        const cameraFolder = gui.addFolder( 'Camera' )
+        cameraFolder.add( camera.position , 'x', 0, 1, 0.05 )
+        cameraFolder.add( camera.position , 'y', -15, 10, 0.05 )
+        cameraFolder.add( camera.position , 'z', 20, 150, 0.05 )
+        cameraFolder.open()
+    }
     
     // SCENE
     scene = new THREE.Scene()
 
-    // TEXTURE
-    const path = './assets/textures/cube/studioSmallHDRI/'
-    const format = '.png'
-    const urls = [
-        path + 'px' + format, path + 'nx' + format,
-        path + 'py' + format, path + 'ny' + format,
-        path + 'pz' + format, path + 'nz' + format
-    ]
-    const cubeTextureLoader = new THREE.CubeTextureLoader()
-    reflectionCube = cubeTextureLoader.load(urls)
-    material = new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: reflectionCube, roughness: 0, metalness: 1 })
-    // material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1, wireframe: true }) // versione wireframe
-
     let resolution = 32; 
 
-    // GUI 
-    // per controllare alcuni elementi della scena
-    function setupGui() {
-        attractorController = {
-            attractor_x: 0,
-            attractor_y: 0,
-            attractor_z: 0
-        }
-
-        // effect
-        effectController = {
-            dx: 5,
-            sx: 0.1,
-            sy: 0.3,
-            sz: 0.5,
-            speed: 1,
-            numBlobs: 5, 
-            resolution: 90, 
-            isolation: 200, 
-            floor: false,
-            wallx: false,
-            wallz: false,
-            dummy: function () { }
-        }
-        
- 
-        // simulation
-        const simulationFolder = gui.addFolder( 'Simulation' );
-       
-        //test attractor 
-        /* h.add( attractorController, 'attractor_x', -10, 10, 0.05);
-        h.add( attractorController, 'attractor_y', -10, 10, 0.05);
-        h.add( attractorController, 'attractor_z', -10, 10, 0.05); */
-
-        simulationFolder.add( effectController, 'dx', -10, 10, 0.05)
-        simulationFolder.add( effectController, 'sx', -10, 10, 0.05)
-        simulationFolder.add( effectController, 'sy', -10, 10, 0.05)
-        simulationFolder.add( effectController, 'sz', -10, 10, 0.05)
-        simulationFolder.add( effectController, 'speed', 0.1, 8.0, 0.05 )
-        simulationFolder.add( effectController, 'numBlobs', 1, 50, 1 )
-        simulationFolder.add( effectController, 'resolution', 14, 100, 1 )
-        simulationFolder.add( effectController, 'isolation', 10, 300, 1 )
-        simulationFolder.add( effectController, 'floor' )
-        simulationFolder.add( effectController, 'wallx' )
-        simulationFolder.add( effectController, 'wallz' )
-        simulationFolder.open()
-
-        // camera
-        const cameraFolder = gui.addFolder( 'Camera' )
-        cameraFolder.add( camera.position , 'x', -500, 500, 0.05 )
-        cameraFolder.add( camera.position , 'y', -500, 500, 0.05 )
-        cameraFolder.add( camera.position , 'z', -500, 500, 0.05 )
-        cameraFolder.open()
-
-        // material (type)
-        /* h = gui.addFolder( 'Materials' );
-        for ( const m in materials ) {
-            effectController[ m ] = createHandler( m );
-            h.add( effectController, m ).name( m );
-        } */
-    }
-
-    effect = new MarchingCubes(resolution, material, true, true, 100000) // 100000 numero massimo di poly
+    effect = new MarchingCubes(resolution, materials[ current_material ], true, true, 100000) // 100000 numero massimo di poly
     effect.position.set(0, 0, 0)
     effect.scale.set(50, 50, 50)
     effect.enableUvs = false
     effect.enableColors = false
     scene.add(effect)
-
+    
     // this controls content of marching cubes voxel field
-    function updateCubes(object, time, numblobs, dx, sx, sy, sz, floor, wallx, wallz) {
+    function updateCubes(object, time, numblobs, dimBlob, sx, sy, sz, floor, wallx, wallz) {
         object.reset()
         // fill the field with some metaballs
-        const subtract = 12; // a cosa serve?
-        const strength = 1.2 / ((Math.sqrt(numblobs) - 1) / 4 + 1) // dimensione delle sfere (dipende da quanti blob ci sono in scena). Da 1.2 a 2
-        
-        for (let i = 0; i < numblobs; i++) {
-            // codice del prof per far muovere le sfere
-            /* const ballx = Math.sin(i + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5
-            const bally = Math.abs(Math.cos(i + 1.12 * time * Math.cos(1.22 + 0.1424 * i))) * 0.77 // dip into the floor
-            const ballz = Math.cos(i + 1.32 * time * 0.1 * Math.sin((0.92 + 0.53 * i))) * 0.27 + 0.5 */
+        const subtract = 12 // a cosa serve?
+        const strength = dimBlob / ((Math.sqrt(numblobs) - 1) / 4 + 1) // dimensione delle sfere (dipende da quanti blob ci sono in scena)
+        // const column = row /2
 
-            // sfere statiche in basso (inizio dello spettacolo)
-            // const ballx = i/dx + Math.sin(i/sx + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5 // posizione x delle sfere
-            const ballx = i/dx + sx
-            const bally = sy // posizione y
-            const ballz = sz // posizione z
+        for (let i = 0; i < numblobs; i++) {
+            const ballx = 0.5 + (Math.sin(i * time * (Math.cos(i)))) * sx
+            const bally = 0.5 + (Math.abs(Math.cos(i * time * Math.cos(i)))) * sy // dip into the floor
+            const ballz = 0.5 + (Math.cos(i * time * Math.sin((i)))) * sz
             object.addBall(ballx, bally, ballz, strength, subtract)
         }
         if (floor) object.addPlaneY(2, 12)
         if (wallz) object.addPlaneZ(2, 12)
-        if (wallx) object.addPlaneX(0.1, 12)
-
+        if (wallx) object.addPlaneX(2, 12)
         object.update()
     }
-
-    // SFERA ATTRATTORE
-    const geometry = new THREE.SphereGeometry( 5, 32, 16 ); 
-    const sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
-    const attractor = new THREE.Mesh( geometry, sphereMaterial ); 
-    scene.add( attractor ); 
-
-    // test sfera attrattore
-    /* function updateAttractor(attractor_x, attractor_y, attractor_z) {
-        attractor.position.set(attractor_x, attractor_y, attractor_z);
-    }  */
-
-    // MOUSE CLICK
-    window.addEventListener('click', function() {
-        // MOUSE POINTER
-        const raycaster = new THREE.Raycaster();
-        const pointer = new THREE.Vector2();
-    
-        function onPointerMove( event ) {
-            // calculate pointer position in normalized device coordinates
-            // (-1 to +1) for both components
-            pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-            attractor.position.set(pointer.x*40, pointer.y*25, 0 )
-            // console.log(pointer);
-        }
-        // update the picking ray with the camera and pointer position
-        raycaster.setFromCamera( pointer, camera );
-        window.addEventListener( 'pointermove', onPointerMove );
-    })
     
     // LIGHTS
-    /* const light = new THREE.DirectionalLight(0xffffff)
+    const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
-    scene.add(light) */
-    /* const pointLight = new THREE.PointLight(0xffffff)
+    scene.add(light) 
+    const pointLight = new THREE.PointLight(0x4287f5)
     pointLight.position.set(0, 0, 100)
-    scene.add(pointLight) */
+    scene.add(pointLight) 
     const ambientLight = new THREE.AmbientLight(0xffffff)
     scene.add(ambientLight)
-    
+        
+    // NOISE
+    noise3D = NOISE.createNoise3D()
+    const t0 = Math.random() * 10
+
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
 
         // ANIMATION
         const delta = clock.getDelta();
-        time += delta * effectController.speed * 0.5;
+        time += delta * c.speed * 0.2;
+
+        const t = t0 + 0.0001 // performance.now() * 0.0001
+
+        effect.rotation.y += noise3D(0, 0, t + 10) * c.speedRotazione
+        pointLight.position.x = pointLight.position.x + noise3D(0, t, 0) * .002
+        pointLight.position.y = pointLight.position.y + noise3D(t + 4, 0, 0) * .003
+        pointLight.position.z = pointLight.position.z + noise3D(0, 0, t + 8) * .001
+
         // marching cubes
-        if (effectController.resolution !== resolution) {
-            resolution = effectController.resolution;
+        if (c.resolution !== resolution) {
+            resolution = c.resolution;
             effect.init(Math.floor(resolution));
         }
-        if (effectController.isolation !== effect.isolation) {
-            effect.isolation = effectController.isolation;
+        if (c.isolation !== effect.isolation) {
+            effect.isolation = c.isolation;
         }
-        updateCubes(effect, time, effectController.numBlobs, effectController.dx, effectController.sx, effectController.sy, effectController.sz, effectController.floor, effectController.wallx, effectController.wallz);
-        // updateAttractor(attractorController.attractor_x, attractorController.attractor_y, attractorController.attractor_z); // test sfera attrattore GUI
+        updateCubes(effect, time, c.numBlobs, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz);
         
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
@@ -236,8 +228,13 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    effect?.dispose()
+    controls?.dispose()
+    geometry?.dispose()
     gui.destroy()
-    controls.dispose()
-    material.dispose()
+    material?.dispose()
+    reflectionCube?.dispose()
+    dispMap?.dispose()
     window.removeEventListener('resize', onWindowResize)
+    noise3D = null
 }
