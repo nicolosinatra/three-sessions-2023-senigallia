@@ -1,4 +1,4 @@
-// Marching cubes
+// Marching cubes // prova piccoli blob
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -21,8 +21,8 @@ export function sketch() {
     const clock = new THREE.Clock()
 
     // CAMERA
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-    camera.position.z = 50
+    let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.z = 60 // allontanato la camera
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -41,10 +41,10 @@ export function sketch() {
     let resolution = 28;
     // effect
     let effectController = {
-        speed: 0.05,
-        numBlobs: 11,
+        speed: .8,
+        numBlobs: 40,
         resolution: 70,
-        isolation: 20,
+        isolation: 80,
         floor: false,
         wallx: false,
         wallz: false,
@@ -61,7 +61,7 @@ export function sketch() {
         object.reset()
         // fill the field with some metaballs
         const subtract = 12;
-        const strength = 1.2 / ((Math.sqrt(numblobs) - 1) / 4 + 1)
+        const strength = .2 / ((Math.sqrt(numblobs) - 1) / 4 + 1)
         for (let i = 0; i < numblobs; i++) {
             const ballx = Math.sin(i + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5
             const bally = Math.abs(Math.cos(i + 1.12 * time * Math.cos(1.22 + 0.1424 * i))) * 0.77 // dip into the floor
@@ -74,15 +74,20 @@ export function sketch() {
         object.update()
     }
 
+    // NOISE
+    // noise3D = NOISE.createNoise3D()
+    // const t0 = Math.random() * 10
+
     // LIGHTS
-    const light = new THREE.DirectionalLight(0xffffff)
+    const light = new THREE.DirectionalLight(0xffffff, 1)
     light.position.set(0.5, 0.5, 1)
     scene.add(light)
-    const pointLight = new THREE.PointLight(0x0000ff)
+    const pointLight = new THREE.PointLight(0x0000ff, 10, 0)
     pointLight.position.set(0, 0, 100)
     scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0x00faff)
+    const ambientLight = new THREE.AmbientLight(0x00faff, 100)
     scene.add(ambientLight)
+
 
     // ANIMATE
     const animate = () => {
