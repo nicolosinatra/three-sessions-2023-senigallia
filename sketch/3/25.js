@@ -73,16 +73,6 @@ export function sketch() {
     // GUI 
     // per controllare alcuni elementi della scena
     function setupGui() {
-        /* const createHandler = function ( id ) {
-            return function () {
-                current_material = id;
-                effect.material = materials[ id ];
-                effect.enableUvs = ( current_material === 'textured' ) ? true : false;
-                effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
-            };
-        }; */
-
-        // test attrattore GUI
         attractorController = {
             attractor_x: 0,
             attractor_y: 0,
@@ -232,8 +222,7 @@ export function sketch() {
             effect.isolation = effectController.isolation;
         }
         updateCubes(effect, time, effectController.numBlobs, effectController.dx, effectController.sx, effectController.sy, effectController.sz, effectController.floor, effectController.wallx, effectController.wallz);
-        // test sfera attrattore GUI
-        // updateAttractor(attractorController.attractor_x, attractorController.attractor_y, attractorController.attractor_z);
+        // updateAttractor(attractorController.attractor_x, attractorController.attractor_y, attractorController.attractor_z); // test sfera attrattore GUI
         
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
