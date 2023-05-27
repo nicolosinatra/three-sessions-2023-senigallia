@@ -1,11 +1,9 @@
-// Planets + DiffisionMap + Noise
+// Planets Gold + Noise
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { LoopSubdivision } from 'three-subdivide'
-import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 
 let scene
-let geometry, groundGeom, parentGeometry
+let geometry, groundGeom, goldGeometry
 let material, material2, groundMate
 let reflectionCube, dispMap
 let animation
@@ -20,21 +18,22 @@ export function sketch() {
 
     const p = {
         // planets 
-        parentScale: 3,
-        childScale: 1,
-        parentPos: new THREE.Vector3(-3, 1.5, 0),
-        childPos: new THREE.Vector3(6, 1.5, 0),
-        parentSpeed: 1,
-        childSpeed: 1,
-        parentRotationSpeed: 0.002,
-        childLight: false,
+        goldScale: 3,
+        silverScale: 3,
+        goldPos: new THREE.Vector3(-4, 1.5, 0),
+        silverPos: new THREE.Vector3(4, 1.5, 0),
+        goldSpeed: 2,
+        silverSpeed: 3,
+        silverRotationSpeed: -0.005,
+        silverLight: false,
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(Math.random() * 20, -5, 20),
-        autoRotate: false,
-        autoRotateSpeed: -0.2,
+        cameraPosition: new THREE.Vector3(Math.random()*-10, -5, 7),
+        autoRotate: true,
+        autoRotateSpeed: 2,
         camera: 35,
         // world
+        backgroundColor: 0xff0000,
         floor: -5,
     }
 
@@ -70,66 +69,49 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x000000)
+    scene.background = new THREE.Color(p.backgroundColor)
     scene.fog = new THREE.Fog(scene.background, 5, 100)
     geometry = new THREE.SphereGeometry(1, 32, 32)
 
-    // child
-    let child
-    material = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        envMap: cubeTextures[0].texture,
-        reflectivity: 1.0,
-        transmission: 1.0,
-        roughness: 0.0,
-        metalness: 0.2,
-        clearcoat: 0.2,
-        clearcoatRoughness: 0.0,
-        ior: 1.5,
-        thickness: 4,
-        fog: false,
-        side: THREE.DoubleSide
+    // silver
+    let silver
+    material = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        envMap: cubeTextures[1].texture,
+        envMapIntensity: 6,
+        bumpMap: textures[0].texture,
+        bumpScale: .1,
+        roughness: 0.3,
+        metalness: 1.0,
+        fog: true,
     })
-    child = new THREE.Mesh(geometry, material)
-    child.position.x = 6
-    child.position.y = 1
-    child.scale.set(p.childScale, p.childScale, p.childScale)
-    child.castShadow = true
-    child.receiveShadow = false
-    scene.add(child)
+    silver = new THREE.Mesh(geometry, material)
+    silver.position.x = 6
+    silver.position.y = 1
+    silver.scale.set(p.silverScale, p.silverScale, p.silverScale)
+    silver.castShadow = true
+    silver.receiveShadow = false
+    scene.add(silver)
 
-    // parent
-    const iterations = 4
-    parentGeometry = LoopSubdivision.modify(geometry, iterations, {
-        split: false,
-        uvSmooth: false,
-        preserveEdges: false,
-        flatOnly: false,
-        maxTriangles: 5000
-    })
-    mergeVertices(parentGeometry)
-    let parent
+    // gold
+    let gold
     dispMap = textures[1].texture
-    material2 = new THREE.MeshPhysicalMaterial({
-        color: 0x9c9c9c,
-        map: textures[0].texture,
-        displacementMap: dispMap,
-        displacementScale: 0.2,
-        displacementBias: 0.0,
-        bumpMap: dispMap,
-        bumpScale: 0.3,
-        roughness: .6,
-        metalness: 0
+    material2 = new THREE.MeshStandardMaterial({
+        color: 0xffff00,
+        envMap: cubeTextures[1].texture,
+        // map: cubeTextures[1].texture,
+        envMapIntensity: 3,
+        roughness: 0.2,
+        metalness: 1.0,
+        fog: true,
     })
-    dispMap.wrapS = dispMap.wrapT = THREE.RepeatWrapping
-    dispMap.repeat.set(1, 1)
-    parent = new THREE.Mesh(parentGeometry, material2)
-    parent.position.y = 1
-    parent.position.x = -3
-    parent.scale.set(p.parentScale, p.parentScale, p.parentScale)
-    parent.castShadow = true
-    parent.receiveShadow = true
-    scene.add(parent)
+    gold = new THREE.Mesh(geometry, material2)
+    gold.position.y = 1
+    gold.position.x = -3
+    gold.scale.set(p.goldScale, p.goldScale, p.goldScale)
+    gold.castShadow = true
+    gold.receiveShadow = true
+    scene.add(gold)
 
     // LIGHTS
     let lightS = new THREE.SpotLight(0x999999, 1, 0, Math.PI / 5, 0.5)
@@ -148,19 +130,19 @@ export function sketch() {
     light.target.position.set(-5, 0, 0)
     // light.castShadow = true
     scene.add(light)
-    // const light2 = new THREE.DirectionalLight(0xffffff, .4)
-    // light.position.set(-10, 3, 0)
-    // light.target.position.set(-5, 0, 0)
-    // light.castShadow = true
-    // scene.add(light2)
+    const light2 = new THREE.DirectionalLight(0xffffff, .4)
+    light2.position.set(-10, 3, 0)
+    light2.target.position.set(-5, 0, 0)
+    light2.castShadow = true
+    scene.add(light2)
     const pointLight = new THREE.PointLight(0xffffff, 2)
     pointLight.position.set(20, 20, 20)
     scene.add(pointLight)
     const pointLight2 = new THREE.PointLight(0xffffff, .1)
     pointLight2.position.set(-30, 20, -20)
     scene.add(pointLight2)
-    // const ambientLight = new THREE.AmbientLight(0xffffff)
-    // scene.add(ambientLight)
+    const ambientLight = new THREE.AmbientLight(0xffffff)
+    scene.add(ambientLight)
 
     // let's make a ground
     groundGeom = new THREE.PlaneGeometry(20, 20)
@@ -184,19 +166,19 @@ export function sketch() {
         const t = t0 + performance.now() * 0.0001
 
         // ANIMATION
-        if (parent) {
-            const t1 = t * p.parentSpeed
-            parent.position.x = p.parentPos.x + noise3D(0, t1, 0) * .2
-            parent.position.y = p.parentPos.y + noise3D(t1 + 4, 0, 0) * .3
-            parent.position.z = p.parentPos.z + noise3D(0, 0, t1 + 8) * .1
-            parent.rotation.y += noise3D(0, 0, t + 10) * p.parentRotationSpeed
+        if (gold) {
+            const t1 = t * p.goldSpeed
+            gold.position.x = p.goldPos.x + noise3D(0, t1, 0) * 2
+            gold.position.y = p.goldPos.y + noise3D(t1 + 4, 0, 0) * 1.5
+            gold.position.z = p.goldPos.z + noise3D(0, 0, t1 + 8) * .4
         }
-        if (child) {
-            const t2 = t * p.childSpeed + 10
-            child.position.x = p.childPos.x + noise3D(0, t2, 0) * .5
-            child.position.y = p.childPos.y + noise3D(t2 + 4, 0, 0) * 1.5
-            child.position.z = p.childPos.z + noise3D(0, 0, t2 + 8) * .4
-            if (p.childLight) pointLight.position.copy(child.position)
+        if (silver) {
+            const t2 = t * p.silverSpeed + 10
+            silver.position.x = p.silverPos.x + noise3D(0, t2, 0) * 2
+            silver.position.y = p.silverPos.y + noise3D(t2 + 4, 0, 0) * 1.5
+            silver.position.z = p.silverPos.z + noise3D(0, 0, t2 + 8) * .4
+            if (p.silverLight) pointLight.position.copy(silver.position)
+            silver.rotation.y += noise3D(0, 0, t + 10) * p.silverRotationSpeed
         }
         // ...
 
@@ -213,7 +195,7 @@ export function dispose() {
     cancelAnimationFrame(animation)
     controls?.dispose()
     geometry?.dispose()
-    parentGeometry?.dispose()
+    goldGeometry?.dispose()
     groundGeom?.dispose()
     material?.dispose()
     material2?.dispose()
