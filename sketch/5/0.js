@@ -13,7 +13,7 @@ export function sketch() {
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
-    image = textures[2].texture
+    image = textures[4].texture
     const imageAspect = 1.77
 
     // CAMERA
