@@ -3,14 +3,25 @@
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-let geometryPlane
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
+
+let scene
+let groundGeom
+let groundMate
 let material
 let animation
 let onWindowResize
 let world
-let pieceBody
+// let pieceBody
 let pieceGeometry
 let controls
+
+let composer
+let renderPass
+let bloomPass
+
 const pieceMaterials = []
 
 export function sketch() {
@@ -18,10 +29,30 @@ export function sketch() {
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
+    const p = {
+        // view
+        lookAtCenter: new THREE.Vector3(0, 4, 0),
+        cameraPosition: new THREE.Vector3(0, 0.5, 0),
+        autoRotate: true,
+        autoRotateSpeed: 0.3,
+        camera: 55,
+        // bloom
+        exposure: 0.5,
+        bloomStrength: 2,
+        bloomThreshold: .2,
+        bloomRadius: .7,
+        // world
+        floor: -1,
+    }
+
+    // other parameters
+    let near = 0.2, far = 1000
+    let shadowMapWidth = 2048, shadowMapHeight = 2048
+
     // CAMERA
-    let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000)
-    camera.position.y = 1.2
-    camera.position.z = 5
+    let camera = new THREE.PerspectiveCamera(p.camera, window.innerWidth / window.innerHeight, near, far)
+    camera.position.copy(p.cameraPosition)
+    camera.lookAt(p.lookAtCenter)
 
     // WINDOW RESIZE
     const onWindowResize = () => {
@@ -31,15 +62,24 @@ export function sketch() {
     }
     window.addEventListener('resize', onWindowResize)
 
-    // SCENE + CANNON
-    // add ground
-    // multiple cubes (for/circle)
-
-    // World
-    const scene = new THREE.Scene()
+    // SCENE
+    scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x000000)
+    scene.fog = new THREE.Fog(scene.background, 15, 100)
     world = new CANNON.World({
-        gravity: new CANNON.Vec3(0, -8.9, 0)
+        gravity: new CANNON.Vec3(0, -5.9, 0)
     })
+
+    // POST-PROCESSING
+    composer = new EffectComposer(renderer)
+    renderPass = new RenderPass(scene, camera)
+    composer.addPass(renderPass)
+    bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = p.bloomThreshold
+    bloomPass.strength = p.bloomStrength
+    bloomPass.radius = p.bloomRadius
+    composer.addPass(bloomPass)
+
     // Default material
     const defaultMaterial = new CANNON.Material('default')
     const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
@@ -51,8 +91,11 @@ export function sketch() {
     world.defaultContactMaterial = defaultContactMaterial
 
     // COLUMNS
-    const columnsNo = 12
-    const columnsRadius = 9
+    const columnsNo = 8
+    const columnsRadius = 12
+    camera.position.z = - columnsRadius / 2
+    const itemsNo = 11 // no of pieces per columns
+    const maxSize = .9 // piece Max radius
     const columns = []
     const columnsPositions = []
     for (let i = 0; i < columnsNo; i++) {
@@ -64,88 +107,127 @@ export function sketch() {
     // COLUMNSMATERIALS
     const pieceColors = [0xff0000, 0x00ff00, 0xff00ff, 0xffff00, 0x0000ff]
     for (let i = 0; i < pieceColors.length; i++) {
-        pieceMaterials.push(new THREE.MeshStandardMaterial({ color: pieceColors[i], roughness: 1 }))
+        pieceMaterials.push(new THREE.MeshStandardMaterial({
+            color: pieceColors[i],
+            roughness: 1,
+            emissive: pieceColors[i],
+            emissiveIntensity: .2,
+            emissiveMap: textures[0].texture,
+            bumpMap: textures[0].texture,
+            bumpScale: .1,
+            fog: true
+        }))
     }
     // COLUMN
-    const itemsNo = 7
     const addPiece = (col, id, pos, size) => {
-        const sizeX = size * 2
-        const sizeY = size + Math.random() * .1
-        const sizeZ = size * 2
-        const pieceBodyShape = new CANNON.Box(new CANNON.Vec3(sizeX, sizeY, sizeZ))
-        pieceGeometry = new THREE.BoxGeometry(sizeX * 2, sizeY * 2, sizeZ * 2)
+        const radiusBottom = size * 2
+        const radiusTop = size * 2
+        const height = size + Math.random() * 2
+        const res = 32
+        const pieceBodyShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, res / 2)
+        pieceGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, res)
         const position = new CANNON.Vec3(
-            pos.x - 0.05 + Math.random() * .005,
-            15,
-            pos.z - 0.05 + Math.random() * .005,
+            pos.x, // - 0.05 + Math.random() * .005,
+            20,
+            pos.z // - 0.05 + Math.random() * .005,
         )
-        pieceBody = new CANNON.Body({
+        const pieceBody = new CANNON.Body({
             position,
-            mass: 1, // .5 + Math.random() * 2,
+            mass: itemsNo - id, // .5 + Math.random() * 2,
             shape: pieceBodyShape,
             allowSleep: true,
         })
-
-        pieceBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0), Math.PI / Math.random())
+        pieceBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / Math.random())
 
         const piece = new THREE.Mesh(pieceGeometry, pieceMaterials[Math.round(Math.random() * (pieceMaterials.length - 1))])
         col.push({
             pieceBody: pieceBody,
             piece: piece,
         })
-        world.addBody(col[id].pieceBody)
-        scene.add(col[id].piece)
+        world.addBody(pieceBody)
+        scene.add(piece)
         col[id].piece.castShadow = true
         col[id].piece.receiveShadow = false
     }
 
     for (let i = 0; i < columnsNo; i++) {
         const column = []
-        const maxSize = 0.4
         columns.push(column)
         for (let j = 0; j < itemsNo; j++) {
-            let size = maxSize - j * 0.02
+            let size = maxSize - j * 0.03
             setTimeout(() => {
                 addPiece(columns[i], j, columnsPositions[i], size)
-            }, j * 5000 + Math.random() * 2000)
+            }, j * 7000 + Math.random() * 3000)
         }
         // console.log(columns[i])
     }
 
 
     // Static ground plane
-    geometryPlane = new THREE.PlaneGeometry(100, 100)
-    const planeMaterial = new THREE.MeshLambertMaterial({color: 0x442200})
-    const plane = new THREE.Mesh(geometryPlane, planeMaterial)
-    plane.castShadow = false
-    plane.receiveShadow = true
+    // let's make a ground
+    groundGeom = new THREE.PlaneGeometry(20, 20)
+    groundMate = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0 })
+    let ground = new THREE.Mesh(groundGeom, groundMate)
+    ground.position.set(0, p.floor, 0)
+    ground.rotation.x = - Math.PI / 2
+    ground.scale.set(100, 100, 100)
+    ground.castShadow = false
+    ground.receiveShadow = true
+    scene.add(ground)
     const groundBody = new CANNON.Body({
-        position: new CANNON.Vec3(0, 0, 0),
+        position: new CANNON.Vec3(0, p.floor, 0),
         mass: 0,
         shape: new CANNON.Plane(),
     })
     groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2)
     groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
-    scene.add(plane)
     world.addBody(groundBody)
-    plane.position.copy(groundBody.position)
-    plane.quaternion.copy(groundBody.quaternion)
+    ground.position.copy(groundBody.position)
+    ground.quaternion.copy(groundBody.quaternion)
 
     // LIGHTS
-    const light = new THREE.DirectionalLight(0xffffff)
-    light.position.set(0, 2, 5)
-    light.castShadow = true
+    let lightS = new THREE.SpotLight(0x999999, 1, 0, Math.PI / 5, .1)
+    lightS.position.set(0, 50, 0)
+    lightS.target.position.set(0, 0, 0)
+    lightS.castShadow = true
+    lightS.shadow.camera.near = 5
+    lightS.shadow.camera.far = 200
+    lightS.shadow.bias = 0.0001
+    lightS.shadow.mapSize.width = shadowMapWidth
+    lightS.shadow.mapSize.height = shadowMapHeight
+    scene.add(lightS)
+
+    const light = new THREE.DirectionalLight(0xffffff, .5)
+    light.position.set(-4, 4, 0)
+    light.target.position.set(0, 10, 10)
+    // light.castShadow = true
     scene.add(light)
-    const pointLight = new THREE.PointLight(0xffffff)
-    pointLight.position.set(0, 0, 100)
-    scene.add(pointLight)
-    const ambientLight = new THREE.AmbientLight(0xffffff)
-    scene.add(ambientLight)
+    // const light2 = new THREE.DirectionalLight(0xffffff, .4)
+    // light2.position.set(-10, 3, 0)
+    // light2.target.position.set(-5, 0, 0)
+    // light2.castShadow = true
+    // scene.add(light2)
+    // const pointLight = new THREE.PointLight(0xffffff, 1)
+    // pointLight.position.set(20, 20, 20)
+    // scene.add(pointLight)
+    const pointLight2 = new THREE.PointLight(0xffffff, .1)
+    pointLight2.position.set(0, 2, 0)
+    scene.add(pointLight2)
+    // const ambientLight = new THREE.AmbientLight(0xffffff)
+    // scene.add(ambientLight)
 
     // CONTROLS
     controls = new OrbitControls(camera, renderer.domElement)
-    controls.target.y = 2.5
-    controls.update()
+    controls.enablePan = false
+    controls.enableDamping = true
+    controls.dampingFactor = 0.05
+    controls.minDistance = 10
+    controls.maxDistance = 25
+    controls.maxPolarAngle = Math.PI / 2 + 0.2
+    controls.minPolarAngle = Math.PI / 2 - 0.4
+    controls.autoRotate = p.autoRotate
+    controls.autoRotateSpeed = p.autoRotateSpeed
+    controls.target = p.lookAtCenter
 
     // ANIMATE
     const timeStep = 1 / 60 // seconds
@@ -171,11 +253,12 @@ export function sketch() {
             }
         }
 
-        camera.rotateY(.0001)
         // ANIMATION
         // ...
 
+        controls.update()
         renderer.render(scene, camera) // RENDER
+        composer.render() // POST-PROCESSING
         stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
@@ -186,7 +269,8 @@ export function sketch() {
 export function dispose() {
     cancelAnimationFrame(animation)
     controls?.dispose()
-    geometryPlane?.dispose()
+    groundGeom?.dispose()
+    groundMate?.dispose()
     pieceGeometry?.dispose()
     material?.dispose()
     for (let i = 0; i < pieceMaterials.length; i++) {
