@@ -11,7 +11,6 @@ let world
 let pieceBody
 let pieceGeometry
 let controls
-let textureEquirec, textureStone
 const pieceMaterials = []
 
 export function sketch() {
@@ -75,42 +74,15 @@ export function sketch() {
     // const pieceColors = [0xff0000, 0x00ff00, 0xff00ff, 0xffff00, 0x0000ff]
     const pieceColors = [0x0110ff, 0x1cff01, 0xfa01e0, 0x01fff4, 0xeaff00]
     for (let i = 0; i < pieceColors.length; i++) {
-        pieceMaterials.push(new THREE.MeshStandardMaterial({ color: pieceColors[i], roughness: 1 }))
+        pieceMaterials.push(
+            new THREE.MeshStandardMaterial({ 
+                color: pieceColors[i], 
+                roughness: .5,
+                bumpMap: textures[0].texture
+            }))
     }
 
-    //COLUMNSTEXTURE // FALLIMENTARE
-    const loader = new THREE.TextureLoader()
-    loader.setPath('/assets/textures/totem/')
-
-    textureStone = loader.load(['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'])
-    textureStone.colorSpace = THREE.SRGBColorSpace
-
-    const textureLoader = new THREE.TextureLoader()
-
-    textureEquirec = textureLoader.load('/assets/textures/totem/stone.jpg')
-    textureEquirec.mapping = THREE.EquirectangularReflectionMapping
-    textureEquirec.colorSpace = THREE.SRGBColorSpace
-
-    // COLUMNSMATERIALS // FALLIMENTARE
-    // for (let i = 0; i < pieceColors.length; i++) {
-    //     pieceMaterials.push(new THREE.MeshPhysicalMaterial({
-    //         color: 0xffffff,
-    //         envMap: global.Columnstextures[0].texture,
-    //         reflectivity: 1.0,
-    //         transmission: 1.0,
-    //         roughness: 0.0,
-    //         metalness: 0.2,
-    //         clearcoat: 0.2,
-    //         clearcoatRoughness: 0.0,
-    //         ior: 1.5,
-    //         thickness: 4,
-    //         fog: false,
-    //         side: THREE.DoubleSide
-            
-    //     }))
-    //     console.log("ciao");
-
-    // }
+    console.log(pieceMaterials[0])
     
     // COLUMN
     const itemsNo = 7
