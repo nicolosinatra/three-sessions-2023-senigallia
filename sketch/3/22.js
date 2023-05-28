@@ -34,7 +34,7 @@ export function sketch() {
         sy: 0.08,
         sz: 0.2,
         speed: 0.02,
-        numBlobs: 40 + Math.random() * 50, 
+        numBlobs: 10, 
         resolution: 80, 
         isolation: 120, 
         wireframe: false,
@@ -155,7 +155,33 @@ export function sketch() {
     effect.enableColors = false
     scene.add(effect)
     
+    function pointsOnSphere(n) {
+        const pts = [];
+        const inc = Math.PI * (3 - Math.sqrt(5));
+        const off = 2.0 / n;
+        let r;
+        var phi;
+        let dmin = 10000;
+        const prev = new THREE.Vector3();
+        const cur = new THREE.Vector3();
+        for (var k = 0; k < n; k++){
+            cur.y = k * off - 1 + (off /2);
+            r = Math.sqrt(1 - cur.y * cur.y);
+            phi = k * inc;
+            cur.x = Math.cos(phi) * r;
+            cur.z = Math.sin(phi) * r;
+    
+            const dist = cur.distanceTo( prev );
+            if( dist < dmin ) dmin = dist;
+    
+            pts.push(cur.clone());
+            prev.copy( cur );
+        }
+        return pts;
+    }
+
     const points = pointsOnSphere(c.numblobs);
+    console.log(points)
     Maf_mix = function( x, y, a ) {
         if( a <= 0 ) return x;
         if( a >= 1 ) return y;
@@ -181,34 +207,6 @@ export function sketch() {
         if (wallz) object.addPlaneZ(2, 12)
         if (wallx) object.addPlaneX(2, 12)
         object.update()
-    }
-    
-    function pointsOnSphere(n) {
-
-        const pts = [];
-        const inc = Math.PI * (3 - Math.sqrt(5));
-        const off = 2.0 / n;
-        let r;
-        var phi;
-        let dmin = 10000;
-        const prev = new THREE.Vector3();
-        const cur = new THREE.Vector3();
-    
-        for (var k = 0; k < n; k++){
-            cur.y = k * off - 1 + (off /2);
-            r = Math.sqrt(1 - cur.y * cur.y);
-            phi = k * inc;
-            cur.x = Math.cos(phi) * r;
-            cur.z = Math.sin(phi) * r;
-    
-            const dist = cur.distanceTo( prev );
-            if( dist < dmin ) dmin = dist;
-    
-            pts.push(cur.clone());
-            prev.copy( cur );
-        }
-    
-        return pts;
     }
 
     // LIGHTS
