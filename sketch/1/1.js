@@ -12,10 +12,11 @@ let animation
 let onWindowResize
 let noise3D
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     const p = {
@@ -30,7 +31,7 @@ export function sketch() {
         childLight: false,
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(Math.random() * -2, -5, 1),
+        cameraPosition: new THREE.Vector3(Math.random() * 20, -5, 20),
         autoRotate: false,
         autoRotateSpeed: -0.2,
         camera: 35,
@@ -211,6 +212,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     parentGeometry?.dispose()

@@ -10,10 +10,11 @@ let animation
 let onWindowResize
 let noise3D
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     const p = {
@@ -193,6 +194,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     goldGeometry?.dispose()

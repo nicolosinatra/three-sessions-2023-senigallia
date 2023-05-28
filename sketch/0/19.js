@@ -1,5 +1,5 @@
 // Particles grid + Shader + MIC lines
-// Grid full screen
+// Grid radial
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -12,10 +12,11 @@ let gui
 let animation
 let onWindowResize
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     // CAMERA
@@ -46,12 +47,19 @@ export function sketch() {
     const positions = new Float32Array(numParticles * 3)
     const scales = new Float32Array(numParticles)
 
-    function updateParticles(object, SEPARATION, AMOUNTX, AMOUNTY) {
+    function updateParticles(SEPARATION, AMOUNTX, AMOUNTY) {
         //object.reset()
-        
+        const meshRef = THREE.InstancedMesh
+        const tmpMatrix = new THREE.Matrix4()
+        const normQuadrantHypotenuse = Math.hypot(0.5, 0.5)
+        let instanceIdx, normGridX, normGridY, normRadialOffset
         let i = 0, j = 0
         for (let ix = 0; ix < AMOUNTX; ix++) {
             for (let iy = 0; iy < AMOUNTY; iy++) {
+                instanceIdx = ix * AMOUNTX + iy
+                normGridX = ix / (AMOUNTY - 1)
+                normGridY = iy / (AMOUNTX - 1)
+                normRadialOffset = Math.hypot(normGridX - 0.5, normGridY - 0.5) / normQuadrantHypotenuse
                 positions[i] = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2) // x
                 positions[i + 1] = 0 // y
                 positions[i + 2] = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2) // z
@@ -103,6 +111,10 @@ export function sketch() {
     cameraFolder.add(camera.position, 'y', 0, 2000)
     cameraFolder.add(camera.position, 'z', -1500, 1500)
     cameraFolder.open()
+    /* const freqAmplitudeFolder = gui.addFolder('Ampiezza')
+    freqAmplitudeFolder.add(freqAmplitude, 'max', 0, 200)
+    freqAmplitudeFolder.open() */
+
 
     // ANIMATE
     const animate = () => {
@@ -111,18 +123,31 @@ export function sketch() {
         // ANIMATION
         const positions = particles.geometry.attributes.position.array;
         const scales = particles.geometry.attributes.scale.array;
+        const gridSizeX = p.AMOUNTY * p.SEPARATION // * cubeSideLength (0.025)
+        const gridSizeY = p.AMOUNTX * p.SEPARATION // * cubeSideLength (0.025)
+
+        
         if (typeof MIC != 'undefined') {
-            updateParticles(particles, p.SEPARATION, p.AMOUNTX, p.AMOUNTY)
+            let instanceIdx, normGridX, normGridY, x, y, z
+            updateParticles(p.SEPARATION, p.AMOUNTX, p.AMOUNTY)
             let i = 0, j = 0
-            for (let ix = 0; ix < p.AMOUNTX; ix++) {
+            for (let ix = 0; ix <= p.AMOUNTX; ix++) {
                 for (let iy = 0; iy < p.AMOUNTY; iy++) {
+                    instanceIdx = ix * p.AMOUNTX + iy
+                    normGridX = ix / (p.AMOUNTY - 1)
+                    normGridY = iy / (p.AMOUNTX - 1)
+
+                    positions[i] = gridSizeX * (normGridX - 0.5)
+                    positions[i + 1] = gridSizeY * (normGridY - 0.5)
                     const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 500)
-                    positions[i + 1] = freqAmplitude / 5
+                    positions[i + 2] = freqAmplitude / 5
                     scales[j] = 2 + freqAmplitude / 20
                     i += 3
                     j++
                 }
             }
+            tmpMatrix.setPosition(positions[i], positions[i + 1], positions[i + 2])
+            meshRef.current.setMatrix(instanceIdx, tmpMatrix)
         }
         particles.geometry.attributes.position.needsUpdate = true
         particles.geometry.attributes.scale.needsUpdate = true
@@ -138,6 +163,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()

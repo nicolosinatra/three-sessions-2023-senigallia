@@ -1,4 +1,4 @@
-// Cube + Cannon
+// Rotating cube + Volume
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -7,13 +7,13 @@ let geometry
 let material
 let animation
 let onWindowResize
-let world
-let body
+let gui
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     // CAMERA
@@ -35,32 +35,31 @@ export function sketch() {
     const cube = new THREE.Mesh(geometry, material)
     scene.add(cube)
 
-    // CANNON
-    world = new CANNON.World()
-    const shape = new CANNON.Box(new CANNON.Vec3(1, 1, 1))
-    body = new CANNON.Body({
-        mass: 1,
-    })
-    body.addShape(shape)
-    body.angularVelocity.set(0, 10, 0)
-    body.angularDamping = 0.5
-    world.addBody(body)
-
     // CONTROLS
     controls = new OrbitControls(camera, renderer.domElement);
+
+    // GUI
+    gui = new GUI.GUI()
+    const cubeFolder = gui.addFolder('Cube')
+    cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'z', 0, Math.PI * 2)
+    cubeFolder.open()
+    const cameraFolder = gui.addFolder('Camera')
+    cameraFolder.add(camera.position, 'z', 0, 10)
+    cameraFolder.open()
 
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
 
-        // CANNON
-        world.fixedStep()
-        cube.position.copy(body.position)
-        cube.quaternion.copy(body.quaternion)
-
         // ANIMATION
+        if (typeof MIC != 'undefined') {
+            // cube.scale.x = MIC.getVol() * .04
+            // cube.scale.x = MIC.volume * .05
+            cube.scale.x = MIC.mapSound(0, 2, .5, 1)
+        }
         // ...
-
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
 
@@ -71,10 +70,10 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()
-    body = null
-    world = null 
+    gui?.destroy()
     window?.removeEventListener('resize', onWindowResize)
 }

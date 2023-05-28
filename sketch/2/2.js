@@ -14,6 +14,7 @@ let material
 let animation
 let onWindowResize
 let world
+let stats
 // let pieceBody
 let pieceGeometry
 let controls
@@ -24,21 +25,21 @@ const pieceMaterials = []
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     const p = {
         // start
         fromSky: false,
-        slowBuild: false,
+        slowBuild: true,
         slowBuildDelay: 1, // sec
         pauseAfterBuild: true,
         pauseAfterBuildTime: 20, // sec
         // columns
         columnsNo: 8,
-        columnsRadius: 12 + Math.random() * 2,
+        columnsRadius: 12,// + Math.random() * 2,
         piecesNo: 11, // no of pieces per columns
-        piaceMaxSize: 0.9 + Math.random() * .3, // piece Max radius
+        piaceMaxSize: 0.9,// + Math.random() * .3, // piece Max radius
         // view
         lookAtCenter: new THREE.Vector3(Math.random() * -4, 4, Math.random() * 4),
         cameraPosition: new THREE.Vector3(0, 0.5, 0), // < z will be recalculated based on columnRadius/2
@@ -295,6 +296,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     groundGeom?.dispose()
     groundMate?.dispose()

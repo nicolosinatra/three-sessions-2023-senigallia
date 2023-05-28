@@ -1,5 +1,5 @@
 // Particles grid + Shader + MIC lines
-// Grid random, diffusione lineare
+// Grid rect, diffusione radiale
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -12,10 +12,11 @@ let gui
 let animation
 let onWindowResize
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     // CAMERA
@@ -107,7 +108,8 @@ export function sketch() {
                     j++
                 }
             }
-        }
+        } 
+
         particles.geometry.attributes.position.needsUpdate = true
         particles.geometry.attributes.scale.needsUpdate = true
 
@@ -121,6 +123,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()

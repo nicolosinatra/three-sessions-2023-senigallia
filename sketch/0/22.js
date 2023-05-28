@@ -1,5 +1,5 @@
 // Particles grid + Shader + MIC lines
-// Focus puntino
+// Grid random, diffusione lineare
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -12,16 +12,17 @@ let gui
 let animation
 let onWindowResize
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
-    camera.position.y = 50
-    
+    camera.position.y = 1200
+
     // WINDOW RESIZE
     const onWindowResize = () => {
         camera.aspect = window.innerWidth / window.innerHeight
@@ -35,9 +36,9 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    const SEPARATION = 100
-    const AMOUNTX = 1
-    const AMOUNTY = 1
+    const SEPARATION = 50
+    const AMOUNTX = 100
+    const AMOUNTY = 20
     const numParticles = AMOUNTX * AMOUNTY
     const positions = new Float32Array(numParticles * 3)
     const scales = new Float32Array(numParticles)
@@ -75,8 +76,6 @@ export function sketch() {
     scene.add(particles);
 
 
-    
-
     // GUI
     gui = new GUI.GUI()
     const particlesFolder = gui.addFolder('Particles')
@@ -102,10 +101,9 @@ export function sketch() {
             let i = 0, j = 0
             for (let ix = 0; ix < AMOUNTX; ix++) {
                 for (let iy = 0; iy < AMOUNTY; iy++) {
-                    const freqAmplitude = MIC.mapSound(i/3, numParticles, 0, 100)
-                    //positions[i + 1] = freqAmplitude / 0.5
-                    scales[j] = 2 + freqAmplitude / 10
-                    
+                    const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 500)
+                    positions[i + 1] = freqAmplitude / 5
+                    scales[j] = 2 + freqAmplitude / 20
                     i += 3
                     j++
                 }
@@ -124,9 +122,10 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()
     gui?.destroy()
-    window.removeEventListener('resize', onWindowResize)
+    window?.removeEventListener('resize', onWindowResize)
 }

@@ -12,30 +12,31 @@ let animation
 let onWindowResize
 let noise3D
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     const p = {
         // planets 
-        parentScale: .5,
-        childScale: 6,
-        parentPos: new THREE.Vector3(-7, -1, 0),
-        childPos: new THREE.Vector3(2, 2, 0),
-        parentSpeed: .5,
-        childSpeed: 5,
-        parentRotationSpeed: 0.05,
+        parentScale: 1,
+        childScale: 5,
+        parentPos: new THREE.Vector3(-7, 1.5, 0),
+        childPos: new THREE.Vector3(2, 1.5, 0),
+        parentSpeed: 0,
+        childSpeed: 2,
+        parentRotationSpeed: 0.01,
         childLight: true,
         // view
-        lookAtCenter: new THREE.Vector3(0, 2, 0),
-        cameraPosition: new THREE.Vector3(-15, -5, 5),
+        lookAtCenter: new THREE.Vector3(0, 1, 0),
+        cameraPosition: new THREE.Vector3(Math.random() * 30, -5, -20),
         autoRotate: false,
         autoRotateSpeed: 1.5,
         camera: 35,
         // world
-        floor: -10
+        floor: -7
     }
 
     // other parameters
@@ -211,6 +212,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     parentGeometry?.dispose()

@@ -1,5 +1,5 @@
 // Particles grid + Shader + MIC lines
-// Grid rect, diffusione radiale
+// Grid full screen
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -12,10 +12,11 @@ let gui
 let animation
 let onWindowResize
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     // CAMERA
@@ -33,25 +34,37 @@ export function sketch() {
     // CONTROLS
     controls = new OrbitControls(camera, renderer.domElement)
 
-    // SCENE
+    // SCENE  
     scene = new THREE.Scene()
-    const SEPARATION = 50
-    const AMOUNTX = 100
-    const AMOUNTY = 20
-    const numParticles = AMOUNTX * AMOUNTY
+
+    const p = {
+        SEPARATION : 50,
+        AMOUNTX : 100,
+        AMOUNTY : 40
+    }
+    
+    const numParticles = p.AMOUNTX * p.AMOUNTY
     const positions = new Float32Array(numParticles * 3)
     const scales = new Float32Array(numParticles)
-    let i = 0, j = 0
-    for (let ix = 0; ix < AMOUNTX; ix++) {
-        for (let iy = 0; iy < AMOUNTY; iy++) {
-            positions[i] = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2) // x
-            positions[i + 1] = 0 // y
-            positions[i + 2] = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2) // z
-            scales[j] = 1
-            i += 3
-            j++
+
+    function updateParticles(object, SEPARATION, AMOUNTX, AMOUNTY) {
+        //object.reset()
+        
+        let i = 0, j = 0
+        for (let ix = 0; ix < AMOUNTX; ix++) {
+            for (let iy = 0; iy < AMOUNTY; iy++) {
+                positions[i] = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2) // x
+                positions[i + 1] = 0 // y
+                positions[i + 2] = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2) // z
+                scales[j] = 1
+                i += 3
+                j++
+            }
         }
+        return positions
+        //object.update()
     }
+
     geometry = new THREE.BufferGeometry()
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
     geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1))
@@ -78,28 +91,32 @@ export function sketch() {
     // GUI
     gui = new GUI.GUI()
     const particlesFolder = gui.addFolder('Particles')
-    particlesFolder.add(particles.rotation, 'x', 0, Math.PI * 2)
-    particlesFolder.add(particles.rotation, 'y', 0, Math.PI * 2)
-    particlesFolder.add(particles.rotation, 'z', 0, Math.PI * 2)
-    particlesFolder.open()
+    particlesFolder.add(p, 'SEPARATION', 0, 100)
+    particlesFolder.add(p, 'AMOUNTX', 0, 200)
+    particlesFolder.add(p, 'AMOUNTY', 0, 200)
+    const planeFolder = gui.addFolder('Plane')
+    planeFolder.add(particles.rotation, 'x', 0, Math.PI * 2)
+    planeFolder.add(particles.rotation, 'y', 0, Math.PI * 2)
+    planeFolder.add(particles.rotation, 'z', 0, Math.PI * 2)
+    planeFolder.open()
     const cameraFolder = gui.addFolder('Camera')
     cameraFolder.add(camera.position, 'x', -2500, 2500)
-    cameraFolder.add(camera.position, 'y', 0, 1000)
+    cameraFolder.add(camera.position, 'y', 0, 2000)
     cameraFolder.add(camera.position, 'z', -1500, 1500)
     cameraFolder.open()
-
 
     // ANIMATE
     const animate = () => {
         stats.begin() // XXX
-
+        
         // ANIMATION
         const positions = particles.geometry.attributes.position.array;
         const scales = particles.geometry.attributes.scale.array;
         if (typeof MIC != 'undefined') {
+            updateParticles(particles, p.SEPARATION, p.AMOUNTX, p.AMOUNTY)
             let i = 0, j = 0
-            for (let ix = 0; ix < AMOUNTX; ix++) {
-                for (let iy = 0; iy < AMOUNTY; iy++) {
+            for (let ix = 0; ix < p.AMOUNTX; ix++) {
+                for (let iy = 0; iy < p.AMOUNTY; iy++) {
                     const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 500)
                     positions[i + 1] = freqAmplitude / 5
                     scales[j] = 2 + freqAmplitude / 20
@@ -107,11 +124,11 @@ export function sketch() {
                     j++
                 }
             }
-        } 
-
+        }
         particles.geometry.attributes.position.needsUpdate = true
         particles.geometry.attributes.scale.needsUpdate = true
 
+        
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX
 
@@ -122,6 +139,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()

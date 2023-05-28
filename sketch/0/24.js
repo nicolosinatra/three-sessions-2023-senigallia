@@ -1,5 +1,5 @@
 // Particles grid + Shader + MIC lines
-// Grid rect, diffusione lineare
+// Grid full screen
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -12,10 +12,11 @@ let gui
 let animation
 let onWindowResize
 let controls
+let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
+    stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
 
     // CAMERA
@@ -37,7 +38,7 @@ export function sketch() {
     scene = new THREE.Scene()
     const SEPARATION = 50
     const AMOUNTX = 100
-    const AMOUNTY = 20
+    const AMOUNTY = 40
     const numParticles = AMOUNTX * AMOUNTY
     const positions = new Float32Array(numParticles * 3)
     const scales = new Float32Array(numParticles)
@@ -84,7 +85,7 @@ export function sketch() {
     particlesFolder.open()
     const cameraFolder = gui.addFolder('Camera')
     cameraFolder.add(camera.position, 'x', -2500, 2500)
-    cameraFolder.add(camera.position, 'y', 0, 1000)
+    cameraFolder.add(camera.position, 'y', 0, 2000)
     cameraFolder.add(camera.position, 'z', -1500, 1500)
     cameraFolder.open()
 
@@ -121,6 +122,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()
