@@ -1,7 +1,6 @@
 // Marching cubes + texture
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
 
 let scene

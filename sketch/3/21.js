@@ -1,16 +1,14 @@
-// looper 45 prove
+// clouds drops
 
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
-import { PerspectiveCamera } from 'three'
+import { PerspectiveCamera } from 'three';
 
 let scene
 let material, current_material
 let reflectionCube, dispMap
-let Maf_mix
 let effect
 let animation
 let onWindowResize
@@ -18,35 +16,35 @@ let noise3D
 let controls
 let gui
 
-
-
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     const c = {
         // clouds 
-        dimBlob: 0.4 + Math.random(),
+        dimBlob: 0.2 + Math.floor(Math.random()*0.3),
         speedRotazione: 0.005, 
-        sx: 0.2,
-        sy: 0.08,
-        sz: 0.2,
-        speed: 0.02,
-        numBlobs: 10, 
-        resolution: 80, 
-        isolation: 120, 
+        x_effetto:0,
+        y_effetto:0,
+        z_effetto:0,
+        sx: 0.45,
+        sy: 0.45,
+        sz: 1,
+        rx: 1.35,
+        ry: 3.15,
+        rz: 0,
+        speed: 0.01,
+        numBlobs: 70 + Math.floor(Math.random() * 90), 
+        resolution: 95, 
+        isolation: 150, 
         wireframe: false,
         //dummy: function () { }
 
         //materials
-        material: 'sky',
+        material: 'sky_lucido',
 
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(10,-10,10),
-        autoRotate: true,
-        autoRotateSpeed: -1,
+        cameraPosition: new THREE.Vector3(0, 30, 200),
         camera: 35,
         near: 0.1,
         far: 1000,
@@ -58,7 +56,8 @@ export function sketch() {
     }
 
     // MATERIALI   
-    current_material = 'sky';
+    current_material = c.material;
+
     dispMap = global.textures[2].texture
     const materials = {
         'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
@@ -101,10 +100,17 @@ export function sketch() {
 
         simulationFolder.add( c, 'dimBlob', 0.01, 2, 0.01)
         simulationFolder.add( c, 'speedRotazione', 0.01, 2, 0.01 )
+
+        simulationFolder.add( c, 'x_effetto', 0.01, 1, 0.01)
+        simulationFolder.add( c, 'y_effetto', -1, 1, 0.01)
+        simulationFolder.add( c, 'z_effetto', 0.01, 1, 0.01)
         simulationFolder.add( c, 'sx', 0.01, 1, 0.01)
         simulationFolder.add( c, 'sy', -1, 1, 0.01)
         simulationFolder.add( c, 'sz', 0.01, 1, 0.01)
-        simulationFolder.add( c, 'speed', 0.01, 2, 0.01 )
+        simulationFolder.add( c, 'rx', -3, Math.PI * 2, 0.05) 
+        simulationFolder.add( c, 'ry', -3, Math.PI * 2, 0.05) 
+        simulationFolder.add( c, 'rz', -3, Math.PI * 2, 0.05) 
+        simulationFolder.add( c, 'speed', 0.001, 2, 0.01 )
         simulationFolder.add( c, 'numBlobs', 1, 100, 1 )
         simulationFolder.add( c, 'resolution', 10, 100, 1 )
         simulationFolder.add( c, 'isolation', 10, 300, 1 )
@@ -137,8 +143,8 @@ export function sketch() {
         // camera
         const cameraFolder = gui.addFolder( 'Camera' )
         cameraFolder.add( camera.position , 'x', 0, 1, 0.05 )
-        cameraFolder.add( camera.position , 'y', -30, 10, 0.05 )
-        cameraFolder.add( camera.position , 'z', 20, 150, 0.05 )
+        cameraFolder.add( camera.position , 'y', -50, 50, 0.05 )
+        cameraFolder.add( camera.position , 'z', 20, 300, 0.05 )
         cameraFolder.open()
     }
     
@@ -148,66 +154,32 @@ export function sketch() {
     let resolution = 32; 
 
     effect = new MarchingCubes(resolution, materials[ current_material ], true, true, 100000) // 100000 numero massimo di poly
-    effect.position.set(0, 0, 0)
-    effect.scale.set(5, 5, 5)
+    effect.position.set(c.x_effetto, c.y_effetto, c.z_effetto)
+    effect.scale.set(100, 100, 100)
     effect.enableUvs = false
     effect.enableColors = false
     scene.add(effect)
     
-    function pointsOnSphere(n) {
-        const pts = [];
-        const inc = Math.PI * (3 - Math.sqrt(5));
-        const off = 2.0 / n;
-        let r;
-        var phi;
-        let dmin = 10000;
-        const prev = new THREE.Vector3();
-        const cur = new THREE.Vector3();
-        for (var k = 0; k < n; k++){
-            cur.y = k * off - 1 + (off /2);
-            r = Math.sqrt(1 - cur.y * cur.y);
-            phi = k * inc;
-            cur.x = Math.cos(phi) * r;
-            cur.z = Math.sin(phi) * r;
-    
-            const dist = cur.distanceTo( prev );
-            if( dist < dmin ) dmin = dist;
-    
-            pts.push(cur.clone());
-            prev.copy( cur );
-        }
-        return pts;
-    }
-
-    const points = pointsOnSphere(c.numblobs);
-    console.log(points)
-    Maf_mix = function( x, y, a ) {
-        if( a <= 0 ) return x;
-        if( a >= 1 ) return y;
-        return x + a * (y - x)
-    };
     // this controls content of marching cubes voxel field
-    function updateCubes( object, time, numblobs, cohesion, strength, subtract, dimBlob, sx, sy, sz, floor, wallx, wallz) {
+    function updateCubes(object, time, numblobs, dimBlob, sx, sy, sz, floor, wallx, wallz) {
         object.reset()
         // fill the field with some metaballs
-        // fill the field with some metaballs
-        var i, ballx, bally, ballz, subtract, strength;
-        for ( i = 0; i < numblobs; i ++ ) {
-            ballx = .5 + .35 * points[i].x;
-            bally = .5 + .35 * points[i].y;
-            ballz = .5 + .35 * points[i].z
-            const c = .5 + .5 * Math.cos((cohesion+time + i/numblobs)); // const c = .5 + .5 * Math.cos((cohesion+time + i/numblobs) * Maf.TAU);
-            ballx = Maf_mix( .5, ballx, c );
-            bally = Maf_mix( .5, bally, c );
-            ballz = Maf_mix( .5, ballz, c );
-            object.addBall(ballx, bally, ballz, strength, subtract);
+        const subtract = 12 // a cosa serve?
+        const strength = dimBlob / ((Math.sqrt(numblobs) - 1) / 4 + 1) // dimensione delle sfere (dipende da quanti blob ci sono in scena)
+        // const column = row /2
+
+        for (let i = 0; i < numblobs; i++) {
+            const ballx = 0.5 + (Math.sin(i * time * (Math.cos(i)))) * sx
+            const bally = 0.5 + (Math.abs(Math.cos(i * time * Math.cos(i)))) * sy // dip into the floor
+            const ballz = 0.5 + (Math.cos(i * time * Math.sin((i)))) * sz
+            object.addBall(ballx, bally, ballz, strength, subtract)
         }
         if (floor) object.addPlaneY(2, 12)
         if (wallz) object.addPlaneZ(2, 12)
         if (wallx) object.addPlaneX(2, 12)
         object.update()
     }
-
+    
     // LIGHTS
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
@@ -224,13 +196,19 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
         const delta = clock.getDelta();
         time += delta * c.speed * 0.2;
 
         const t = t0 + 0.0001 // performance.now() * 0.0001
+
+        effect.rotation.set(c.rx, c.ry, c.rz)
+        // effect.rotation.y += noise3D(0, 0, t + 10) * c.speedRotazione
+        pointLight.position.x = pointLight.position.x + noise3D(0, t, 0) * .002
+        pointLight.position.y = pointLight.position.y + noise3D(t + 4, 0, 0) * .003
+        pointLight.position.z = pointLight.position.z + noise3D(0, 0, t + 8) * .001
 
         // marching cubes
         if (c.resolution !== resolution) {
@@ -240,17 +218,10 @@ export function sketch() {
         if (c.isolation !== effect.isolation) {
             effect.isolation = c.isolation;
         }
-        const subtract = 12 - 10 * (.5 + .5 * Math.cos( t * 2 * Math.PI)); // 2 * Math.PI ==> Maf.TAU
-        const strength = .5;//.5 / ( ( Math.sqrt( numblobs ) - 1 ) / 4 + 1 );
-
-        updateCubes( effect, t, .5 + .5 * Math.sin( t * 2 * Math.PI ), strength, subtract, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz );
-
-        const tt = easings.InOutQuad(t);
-        effect.rotation.y = .5 * Math.PI;
-        effect.rotation.z = tt * 2 * Math.PI;
+        updateCubes(effect, time, c.numBlobs, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz);
         
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
