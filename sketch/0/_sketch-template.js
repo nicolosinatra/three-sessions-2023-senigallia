@@ -1,26 +1,18 @@
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-let renderer
 let scene
 let material
 let geometry
 let animation
 let onWindowResize
 let gui
+let controls
 
-export function sketch(canvas3D, THREE) {
+export function sketch() {
     console.log("Sketch launched")
     const stats = new Stats() // XXX
     canvas3D.appendChild(stats.dom)
-
-    // RENDERER
-    renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    canvas3D.appendChild(renderer.domElement)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -35,7 +27,7 @@ export function sketch(canvas3D, THREE) {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    const controls = new OrbitControls(camera, renderer.domElement)
+    controls = new OrbitControls(camera, renderer.domElement)
 
     // SCENE
     scene = new THREE.Scene()
@@ -44,10 +36,10 @@ export function sketch(canvas3D, THREE) {
     // scene.add(X)
 
     // GUI
-    gui = new GUI.GUI()
-    const nameFolder = gui.addFolder('Name of the folder')
-    nameFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
-    nameFolder.open()
+    // gui = new GUI.GUI()
+    // const nameFolder = gui.addFolder('Name of the folder')
+    // nameFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+    // nameFolder.open()
     // ...
 
     // ANIMATE
@@ -67,7 +59,7 @@ export function sketch(canvas3D, THREE) {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    renderer.dispose()
+    controls?.dispose()
     // geometry.dispose()
     // material.dispose()
     // gui.destroy()

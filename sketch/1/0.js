@@ -7,7 +7,7 @@ import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 let scene
 let geometry, groundGeom, parentGeometry
 let material, material2, groundMate
-let reflectionCube, dispMap, diffMap, bumpMap
+let reflectionCube, dispMap
 let animation
 let onWindowResize
 let noise3D
@@ -22,17 +22,20 @@ export function sketch() {
         // planets 
         parentScale: 3,
         childScale: 1,
-        parentPos: new THREE.Vector3(-3, 1, 0),
-        childPos: new THREE.Vector3(6, 1, 0),
+        parentPos: new THREE.Vector3(-3, 1.5, 0),
+        childPos: new THREE.Vector3(6, 1.5, 0),
+        parentSpeed: 1,
+        childSpeed: 1,
+        parentRotationSpeed: 0.002,
         childLight: false,
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(Math.random() * 30, -5, 20),
-        autoRotate: true,
-        autoRotateSpeed: -0.5,
+        cameraPosition: new THREE.Vector3(Math.random() * 20, -5, 20),
+        autoRotate: false,
+        autoRotateSpeed: -0.2,
         camera: 35,
         // world
-        floor: -5
+        floor: -5,
     }
 
     // other parameters
@@ -75,7 +78,7 @@ export function sketch() {
     let child
     material = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        envMap: global.cubeTextures[0].texture,
+        envMap: cubeTextures[0].texture,
         reflectivity: 1.0,
         transmission: 1.0,
         roughness: 0.0,
@@ -106,10 +109,10 @@ export function sketch() {
     })
     mergeVertices(parentGeometry)
     let parent
-    dispMap = global.textures[1].texture
+    dispMap = textures[1].texture
     material2 = new THREE.MeshPhysicalMaterial({
         color: 0x9c9c9c,
-        map: global.textures[0].texture,
+        map: textures[0].texture,
         displacementMap: dispMap,
         displacementScale: 0.2,
         displacementBias: 0.0,
@@ -178,17 +181,18 @@ export function sketch() {
     const animate = () => {
         stats.begin() // XXX
 
-        const t = t0 + 0.0001// performance.now() * 0.0001
+        const t = t0 + performance.now() * 0.0001
 
         // ANIMATION
         if (parent) {
-            parent.position.x = p.parentPos.x + noise3D(0, t, 0) * .2
-            parent.position.y = p.parentPos.y + noise3D(t + 4, 0, 0) * .3
-            parent.position.z = p.parentPos.z + noise3D(0, 0, t + 8) * .1
-            parent.rotation.y += noise3D(0, 0, t + 10) * 0.005
+            const t1 = t * p.parentSpeed
+            parent.position.x = p.parentPos.x + noise3D(0, t1, 0) * .2
+            parent.position.y = p.parentPos.y + noise3D(t1 + 4, 0, 0) * .3
+            parent.position.z = p.parentPos.z + noise3D(0, 0, t1 + 8) * .1
+            parent.rotation.y += noise3D(0, 0, t + 10) * p.parentRotationSpeed
         }
         if (child) {
-            const t2 = t + 10
+            const t2 = t * p.childSpeed + 10
             child.position.x = p.childPos.x + noise3D(0, t2, 0) * .5
             child.position.y = p.childPos.y + noise3D(t2 + 4, 0, 0) * 1.5
             child.position.z = p.childPos.z + noise3D(0, 0, t2 + 8) * .4
