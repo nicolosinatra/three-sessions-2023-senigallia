@@ -1,6 +1,5 @@
 // Cube + Cannon / prova "lenta esplosione"
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let geometry
@@ -9,12 +8,9 @@ let animation
 let onWindowResize
 let world
 let controls
-let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -82,7 +78,7 @@ export function sketch() {
     let clock = new THREE.Clock()
     let delta = 0
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // CANNON
         delta = Math.min(clock.getDelta(), 0.1)
@@ -106,7 +102,7 @@ export function sketch() {
         // ...
 
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
@@ -115,7 +111,6 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    canvas3D?.removeChild(stats.dom)
     // we need to dispose all the bodies... XXX
     controls?.dispose()
     geometry?.dispose()

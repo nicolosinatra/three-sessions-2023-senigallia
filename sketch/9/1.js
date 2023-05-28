@@ -1,6 +1,5 @@
 // Rotating cube + Post processing Glitch + GUI
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
@@ -16,12 +15,9 @@ let renderPass
 let glitchPass
 let gui
 let controls
-let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -65,7 +61,7 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
         cube.rotation.x += 0.01
@@ -74,7 +70,7 @@ export function sketch() {
 
         renderer.render(scene, camera) // RENDER
         composer.render() // POST-PROCESSING
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
@@ -83,7 +79,6 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     composer?.dispose()
     renderPass?.dispose()

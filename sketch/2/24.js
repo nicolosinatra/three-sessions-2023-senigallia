@@ -1,6 +1,5 @@
 // Column + Cannon
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let geometryPlane
@@ -11,13 +10,10 @@ let world
 let pieceBody
 let pieceGeometry
 let controls
-let stats
 const pieceMaterials = []
 
 export function sketch() {
     console.log("Sketch launched")
-    stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -170,7 +166,7 @@ export function sketch() {
     const timeStep = 1 / 60 // seconds
     let lastCallTime
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         const time = performance.now() / 1000 // seconds
         if (!lastCallTime) {
@@ -195,7 +191,7 @@ export function sketch() {
         // ...
 
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
@@ -204,7 +200,6 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometryPlane?.dispose()
     pieceGeometry?.dispose()

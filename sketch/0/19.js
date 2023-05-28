@@ -1,7 +1,6 @@
 // Particles grid + Shader + MIC lines
 // Grid radial
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let scene
@@ -12,12 +11,9 @@ let gui
 let animation
 let onWindowResize
 let controls
-let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
@@ -118,7 +114,7 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
         
         // ANIMATION
         const positions = particles.geometry.attributes.position.array;
@@ -154,7 +150,7 @@ export function sketch() {
 
         
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
@@ -163,7 +159,6 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()

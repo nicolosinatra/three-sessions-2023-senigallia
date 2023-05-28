@@ -1,5 +1,4 @@
 // Planets + Noise
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let scene
@@ -15,12 +14,9 @@ let animation
 let onWindowResize
 let noise3D
 let controls
-let stats
 
 export function sketch() {
     console.log("Sketch launched")
-    stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     let near = 10, far = 1000, floor = -5
     let shadowMapWidth = 2048, shadowMapHeight = 2048
@@ -141,7 +137,7 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         const t = t0 + performance.now() * 0.0001
 
@@ -159,7 +155,7 @@ export function sketch() {
         // ...
 
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
@@ -168,7 +164,6 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    canvas3D?.removeChild(stats.dom)
     controls?.dispose()
     geometry?.dispose()
     groundGeom?.dispose()
