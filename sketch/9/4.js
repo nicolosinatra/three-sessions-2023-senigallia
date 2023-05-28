@@ -29,7 +29,7 @@ export function sketch() {
 
     // SCENE + CANNON
     const scene = new THREE.Scene()
-    const INSTANCES = 40
+    const INSTANCES = 40 
     geometry = new THREE.SphereGeometry(1, 64, 32)
     material = new THREE.MeshMatcapMaterial()
     let spheres = new THREE.InstancedMesh(geometry, material, INSTANCES)
