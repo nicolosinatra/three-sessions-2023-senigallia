@@ -295,13 +295,15 @@ const loadTexture = (name, path, format) => {
 }
 // Let's preload our textures
 // global.cubeTextures[n]
-loadCubeTexture('PureSky', './assets/textures/cube/PureSky-256/', '.png') // 0
-loadCubeTexture('MilkyWay', './assets/textures/cube/MilkyWay/dark-s_', '.jpg') // 1
+loadCubeTexture('PureSky', '/assets/textures/cube/PureSky-256/', '.png') // 0
+loadCubeTexture('MilkyWay', '/assets/textures/cube/MilkyWay/dark-s_', '.jpg') // 1
+loadCubeTexture('teatro', '/assets/textures/cube/teatro/', '.png') // 2
 // global.textures[n]
-loadTexture('StoneDiff', './assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
-loadTexture('StoneDisp', './assets/textures/stone_tiles_02_disp_4k', '.png') // 1
-
-loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 2
+loadTexture('StoneDiff', '/assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
+loadTexture('StoneDisp', '/assets/textures/stone_tiles_02_disp_4k', '.png') // 1
+loadTexture('Facce_colori', '/assets/textures/Mosaico_facce_colori', '.jpg') // 2
+loadTexture('Facce_bk', '/assets/textures/Mosaico_facce_bk', '.jpg') // 3
+loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 4
 
 // INIT
 const init = () => {
