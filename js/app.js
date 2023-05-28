@@ -30,10 +30,13 @@ import * as THREE from 'three'
 import * as GUI from 'dat.gui'
 import * as CANNON from 'cannon-es'
 import * as NOISE from 'simplex-noise'
+import Stats from 'three/addons/libs/stats.module.js' 
 global.THREE = THREE
 global.GUI = GUI
 global.CANNON = CANNON
 global.NOISE = NOISE
+
+global.showStats = true // xxx
 
 let myThree
 const artFolder = "sketch"
@@ -320,6 +323,10 @@ const init = () => {
 	renderer.toneMappingExposure = 1.2
 	renderer.setSize(window.innerWidth, window.innerHeight)
 	canvas3D.appendChild(renderer.domElement)
+	if (showStats) {
+		global.stats = new Stats() // XXX
+    	canvas3D.appendChild(stats.dom)
+	}
 	// setTimeout(() => {
 	// 	toggleFullscreen();
 	//   }, 5000);

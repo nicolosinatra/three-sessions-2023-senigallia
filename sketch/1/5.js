@@ -1,5 +1,4 @@
 // Planets + DiffisionMap + Noise
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { LoopSubdivision } from 'three-subdivide'
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -15,27 +14,25 @@ let controls
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     const p = {
         // planets 
-        parentScale: .5,
-        childScale: 6,
-        parentPos: new THREE.Vector3(-7, -1, 0),
-        childPos: new THREE.Vector3(2, 2, 0),
-        parentSpeed: .5,
-        childSpeed: 5,
-        parentRotationSpeed: 0.05,
+        parentScale: 1,
+        childScale: 5,
+        parentPos: new THREE.Vector3(-7, 1.5, 0),
+        childPos: new THREE.Vector3(2, 1.5, 0),
+        parentSpeed: 0,
+        childSpeed: 2,
+        parentRotationSpeed: 0.01,
         childLight: true,
         // view
-        lookAtCenter: new THREE.Vector3(0, 2, 0),
-        cameraPosition: new THREE.Vector3(-15, -5, 5),
+        lookAtCenter: new THREE.Vector3(0, 1, 0),
+        cameraPosition: new THREE.Vector3(Math.random() * 30, -5, -20),
         autoRotate: false,
         autoRotateSpeed: 1.5,
         camera: 35,
         // world
-        floor: -10
+        floor: -7
     }
 
     // other parameters
@@ -179,7 +176,7 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         const t = t0 + performance.now() * 0.0001
 
@@ -202,7 +199,7 @@ export function sketch() {
         
         controls.update()
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }

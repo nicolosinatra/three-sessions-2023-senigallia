@@ -1,6 +1,5 @@
 // Column + Cannon
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
@@ -24,16 +23,14 @@ const pieceMaterials = []
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     const p = {
         // start
-        fromSky: true,
+        fromSky: false,
         slowBuild: false,
         slowBuildDelay: 1, // sec
         pauseAfterBuild: true,
-        pauseAfterBuildTime: 5, // sec
+        pauseAfterBuildTime: 20, // sec
         // columns
         columnsNo: 8,
         columnsRadius: 12 + Math.random() * 2,
@@ -43,7 +40,7 @@ export function sketch() {
         lookAtCenter: new THREE.Vector3(Math.random() * -4, 4, Math.random() * 4),
         cameraPosition: new THREE.Vector3(0, 0.5, 0), // < z will be recalculated based on columnRadius/2
         autoRotate: true,
-        autoRotateSpeed: -1 + Math.random() * 2,
+        autoRotateSpeed: -.5 + Math.random(),
         camera: 55,
         // bloom
         exposure: 0.5,
@@ -259,7 +256,7 @@ export function sketch() {
     const timeStep = 1 / 60 // seconds
     let lastCallTime
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
         if (!paused) {
@@ -286,7 +283,7 @@ export function sketch() {
         controls.update()
         renderer.render(scene, camera) // RENDER
         composer.render() // POST-PROCESSING
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }

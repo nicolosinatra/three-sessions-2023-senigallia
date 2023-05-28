@@ -17,8 +17,6 @@ let controls
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -167,7 +165,7 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
 
@@ -175,7 +173,7 @@ export function sketch() {
         // ...
 
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }

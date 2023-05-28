@@ -1,4 +1,4 @@
-// Cube + Cannon / prova "lenta esplosione"
+// Cube + Cannon
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
@@ -26,7 +26,7 @@ export function sketch() {
 
     // SCENE + CANNON
     const scene = new THREE.Scene()
-    const INSTANCES = 30
+    const INSTANCES = 40 
     geometry = new THREE.SphereGeometry(1, 64, 32)
     material = new THREE.MeshMatcapMaterial()
     let spheres = new THREE.InstancedMesh(geometry, material, INSTANCES)
@@ -52,11 +52,11 @@ export function sketch() {
         let r = Math.random(4) + 2
         let sphereMesh = new THREE.Object3D()
         sphereMesh.scale.setScalar(r)
-        sphereMesh.position.randomDirection().setLength(Math.random() * 500)
+        sphereMesh.position.randomDirection().setLength(Math.random() * 50)
         scene.add(sphereMesh)
         const sphereShape = new CANNON.Sphere(r)
         const sphereBody = new CANNON.Body({
-            mass: 50,
+            mass: 1,
             // material: physicsMaterial 
         })
         sphereBody.addShape(sphereShape)

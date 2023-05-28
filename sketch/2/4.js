@@ -26,21 +26,21 @@ export function sketch() {
 
     const p = {
         // start
-        fromSky: false,
-        slowBuild: true,
+        fromSky: true,
+        slowBuild: false,
         slowBuildDelay: 1, // sec
         pauseAfterBuild: true,
-        pauseAfterBuildTime: 20, // sec
+        pauseAfterBuildTime: 5, // sec
         // columns
         columnsNo: 8,
-        columnsRadius: 12,// + Math.random() * 2,
+        columnsRadius: 12 + Math.random() * 2,
         piecesNo: 11, // no of pieces per columns
-        piaceMaxSize: 0.9,// + Math.random() * .3, // piece Max radius
+        piaceMaxSize: 0.9 + Math.random() * .3, // piece Max radius
         // view
         lookAtCenter: new THREE.Vector3(Math.random() * -4, 4, Math.random() * 4),
         cameraPosition: new THREE.Vector3(0, 0.5, 0), // < z will be recalculated based on columnRadius/2
         autoRotate: true,
-        autoRotateSpeed: -.5 + Math.random(),
+        autoRotateSpeed: -1 + Math.random() * 2,
         camera: 55,
         // bloom
         exposure: 0.5,

@@ -1,6 +1,5 @@
-// Rotating cube + Volume
+// Rotating cube
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let geometry
@@ -12,8 +11,6 @@ let controls
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -50,17 +47,15 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
-        if (typeof MIC != 'undefined') {
-            // cube.scale.x = MIC.getVol() * .04
-            // cube.scale.x = MIC.volume * .05
-            cube.scale.x = MIC.mapSound(0, 2, .5, 1)
-        }
+        cube.rotation.x += 0.004
+        cube.rotation.y += 0.01
         // ...
+
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }

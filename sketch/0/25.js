@@ -1,131 +1,126 @@
-var noise = new SimplexNoise();
-var vizInit = function (){
-  
-  //var audio = document.getElementById("audio");
+// Particles grid + Shader + MIC lines
+// Grid rect, diffusione lineare
 
-  audio.src = '/audio/Iosonouncane_Hajar.mp3';
-  audio.play();
-  play();
-  
-  
-function play() {
-    var context = new AudioContext();
-    var src = context.createMediaElementSource(audio);
-    var analyser = context.createAnalyser();
-    src.connect(analyser);
-    analyser.connect(context.destination);
-    analyser.fftSize = 512;
-    var bufferLength = analyser.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
-    var scene = new THREE.Scene();
-    var group = new THREE.Group();
-    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0,0,300);
-    camera.lookAt(scene.position);
-    scene.add(camera);
-    
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-    var icosahedronGeometry = new THREE.IcosahedronGeometry(0.1, 4); //(radius, details)
-    var lambertMaterial = new THREE.MeshLambertMaterial({
-        color: 0xffffff,
-        wireframe: false
-    });
+let scene
+let material
+let geometry
+let particles
+let gui
+let animation
+let onWindowResize
+let controls
 
-    var ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-    ball.position.set(0, 0, 0); //centro di rotazione su se stessa
-    group.add(ball);
+export function sketch() {
+    console.log("Sketch launched")
 
-    var ambientLight = new THREE.AmbientLight(0xe6e3e3);
-    scene.add(ambientLight);
+    // CAMERA
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
+    camera.position.y = 1200
 
-    var spotLight = new THREE.SpotLight(0xbb192a);
-    spotLight.intensity = 0.5;
-    spotLight.position.set(-10, 40, 10);
-    spotLight.lookAt(ball);
-    spotLight.castShadow = true;
-    scene.add(spotLight);
-    
-    scene.add(group);
-
-    render();
-
-    function render() {
-      analyser.getByteFrequencyData(dataArray);
-
-      var lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
-      var upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
-
-      var overallAvg = avg(dataArray);
-      var lowerMax = max(lowerHalfArray);
-      var lowerAvg = avg(lowerHalfArray);
-      var upperMax = max(upperHalfArray);
-      var upperAvg = avg(upperHalfArray);
-
-      var lowerMaxFr = lowerMax / lowerHalfArray.length;
-      var lowerAvgFr = lowerAvg / lowerHalfArray.length;
-      var upperMaxFr = upperMax / upperHalfArray.length;
-      var upperAvgFr = upperAvg / upperHalfArray.length;
-
-     
-      
-      makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
-
-      group.rotation.y += 0.005;
-      renderer.render(scene, camera);
-      requestAnimationFrame(render);
+    // WINDOW RESIZE
+    const onWindowResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight)
     }
+    window.addEventListener('resize', onWindowResize)
 
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    // CONTROLS
+    controls = new OrbitControls(camera, renderer.domElement)
+
+    // SCENE
+    scene = new THREE.Scene()
+    const SEPARATION = 50
+    const AMOUNTX = 100
+    const AMOUNTY = 20
+    const numParticles = AMOUNTX * AMOUNTY
+    const positions = new Float32Array(numParticles * 3)
+    const scales = new Float32Array(numParticles)
+    let i = 0, j = 0
+    for (let ix = 0; ix < AMOUNTX; ix++) {
+        for (let iy = 0; iy < AMOUNTY; iy++) {
+            positions[i] = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2) // x
+            positions[i + 1] = 0 // y
+            positions[i + 2] = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2) // z
+            scales[j] = 1
+            i += 3
+            j++
+        }
     }
+    geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1))
+    material = new THREE.ShaderMaterial({
+        uniforms: {
+            color: { value: new THREE.Color(0xffffff) },
+        },
+        vertexShader: `attribute float scale;
+                       void main() {
+                           vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                           gl_PointSize = scale * ( 300.0 / - mvPosition.z );
+                           gl_Position = projectionMatrix * mvPosition;
+                       }`,
+        fragmentShader: `uniform vec3 color;
+                         void main() {
+                           if ( length( gl_PointCoord - vec2( 0.5, 0.5 ) ) > 0.475 ) discard;
+                           gl_FragColor = vec4( color, 1.0 );
+                         }`
+    })
+    particles = new THREE.Points(geometry, material);
+    scene.add(particles);
 
-    function makeRoughBall(mesh, bassFr, treFr) {
-        mesh.geometry.vertices.forEach(function (vertex, i) {
-            var offset = mesh.geometry.parameters.radius;
-            var amp = 7;
-            var time = window.performance.now();
-            vertex.normalize();
-            var rf = 0.00001;
-            var distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
-            vertex.multiplyScalar(distance);
-        });
-        mesh.geometry.verticesNeedUpdate = true;
-        mesh.geometry.normalsNeedUpdate = true;
-        mesh.geometry.computeVertexNormals();
-        mesh.geometry.computeFaceNormals();
+
+    // GUI
+    gui = new GUI.GUI()
+    const particlesFolder = gui.addFolder('Particles')
+    particlesFolder.add(particles.rotation, 'x', 0, Math.PI * 2)
+    particlesFolder.add(particles.rotation, 'y', 0, Math.PI * 2)
+    particlesFolder.add(particles.rotation, 'z', 0, Math.PI * 2)
+    particlesFolder.open()
+    const cameraFolder = gui.addFolder('Camera')
+    cameraFolder.add(camera.position, 'x', -2500, 2500)
+    cameraFolder.add(camera.position, 'y', 0, 1000)
+    cameraFolder.add(camera.position, 'z', -1500, 1500)
+    cameraFolder.open()
+
+
+    // ANIMATE
+    const animate = () => {
+        if (showStats) stats.begin() // XXX
+
+        // ANIMATION
+        const positions = particles.geometry.attributes.position.array;
+        const scales = particles.geometry.attributes.scale.array;
+        if (typeof MIC != 'undefined') {
+            let i = 0, j = 0
+            for (let ix = 0; ix < AMOUNTX; ix++) {
+                for (let iy = 0; iy < AMOUNTY; iy++) {
+                    const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 500)
+                    positions[i + 1] = freqAmplitude / 5
+                    scales[j] = 2 + freqAmplitude / 20
+                    i += 3
+                    j++
+                }
+            }
+        }
+        particles.geometry.attributes.position.needsUpdate = true
+        particles.geometry.attributes.scale.needsUpdate = true
+
+        renderer.render(scene, camera) // RENDER
+        if (showStats) stats.end() // XXX
+
+        animation = requestAnimationFrame(animate) // CIAK
     }
-
-    
-
-    audio.play();
-  };
+    animate()
 }
 
-window.onload = vizInit();
-
-document.body.addEventListener('touchend', function(ev) { context.resume(); });
-
-
-
-
-
-function fractionate(val, minVal, maxVal) {
-    return (val - minVal)/(maxVal - minVal);
-}
-
-function modulate(val, minVal, maxVal, outMin, outMax) {
-    var fr = fractionate(val, minVal, maxVal);
-    var delta = outMax - outMin;
-    return outMin + (fr * delta);
-}
-
-function avg(arr){
-    var total = arr.reduce(function(sum, b) { return sum + b; });
-    return (total / arr.length);
-}
-
-function max(arr){
-    return arr.reduce(function(a, b){ return Math.max(a, b); })
+export function dispose() {
+    cancelAnimationFrame(animation)
+    controls?.dispose()
+    geometry?.dispose()
+    material?.dispose()
+    gui?.destroy()
+    window?.removeEventListener('resize', onWindowResize)
 }

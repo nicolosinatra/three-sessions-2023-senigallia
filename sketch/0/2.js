@@ -1,6 +1,5 @@
-// Particles grid + Shader + MIC lines
+// Particles grid + Shader + MIC points
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let scene
@@ -9,12 +8,9 @@ let geometry
 let particles
 let animation
 let onWindowResize
-let controls
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
@@ -29,7 +25,7 @@ export function sketch() {
     window.addEventListener('resize', onWindowResize)
 
     // CONTROLS
-    controls = new OrbitControls(camera, renderer.domElement)
+    const controls = new OrbitControls(camera, renderer.domElement)
 
     // SCENE
     scene = new THREE.Scene()
@@ -74,7 +70,7 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
         const positions = particles.geometry.attributes.position.array;
@@ -82,20 +78,20 @@ export function sketch() {
         if (typeof MIC != 'undefined') {
             let i = 0, j = 0
             for (let ix = 0; ix < AMOUNTX; ix++) {
-                const freqAmplitude = MIC.mapSound(ix, AMOUNTX, 0, 200)
                 for (let iy = 0; iy < AMOUNTY; iy++) {
+                    const freqAmplitude = MIC.mapSound(i/3, numParticles, 1, 200)
                     positions[i + 1] = freqAmplitude
                     scales[j] = 2 + freqAmplitude / 10
                     i += 3
                     j++
                 }
             }
-        }
+        } 
         particles.geometry.attributes.position.needsUpdate = true
         particles.geometry.attributes.scale.needsUpdate = true
 
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
@@ -104,7 +100,6 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    controls?.dispose()
     geometry?.dispose()
     material?.dispose()
     window.removeEventListener('resize', onWindowResize)

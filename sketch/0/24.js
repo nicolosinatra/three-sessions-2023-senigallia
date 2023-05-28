@@ -1,7 +1,6 @@
 // Particles grid + Shader + MIC lines
-// Grid rect, diffusione lineare
+// Grid full screen
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 let scene
@@ -15,8 +14,6 @@ let controls
 
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     // CAMERA
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
@@ -37,7 +34,7 @@ export function sketch() {
     scene = new THREE.Scene()
     const SEPARATION = 50
     const AMOUNTX = 100
-    const AMOUNTY = 20
+    const AMOUNTY = 40
     const numParticles = AMOUNTX * AMOUNTY
     const positions = new Float32Array(numParticles * 3)
     const scales = new Float32Array(numParticles)
@@ -84,14 +81,14 @@ export function sketch() {
     particlesFolder.open()
     const cameraFolder = gui.addFolder('Camera')
     cameraFolder.add(camera.position, 'x', -2500, 2500)
-    cameraFolder.add(camera.position, 'y', 0, 1000)
+    cameraFolder.add(camera.position, 'y', 0, 2000)
     cameraFolder.add(camera.position, 'z', -1500, 1500)
     cameraFolder.open()
 
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
         const positions = particles.geometry.attributes.position.array;
@@ -112,7 +109,7 @@ export function sketch() {
         particles.geometry.attributes.scale.needsUpdate = true
 
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
