@@ -308,7 +308,7 @@ loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 4
 // INIT
 const init = () => {
 	window.document.body.style.cursor = 'none'
-	changeSet(1)
+	changeSet(2)
 	// RENDERER
 	global.renderer = new THREE.WebGLRenderer({
 		alpha: true,
