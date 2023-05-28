@@ -1,15 +1,17 @@
-// clouds at the top of the screen
+// looper 45 prove
 
 
 import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
-import { PerspectiveCamera } from 'three';
+// import Maf from './assets/modules/maf.js'
+import { PerspectiveCamera } from 'three'
 
 let scene
 let material, current_material
-let reflectionCube, dispMap, diffMap, bumpMap
+let reflectionCube, dispMap
+let Maf_mix
 let effect
 let animation
 let onWindowResize
@@ -43,7 +45,7 @@ export function sketch() {
 
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(0, -20, 50),
+        cameraPosition: new THREE.Vector3(10,-10,10),
         autoRotate: true,
         autoRotateSpeed: -1,
         camera: 35,
@@ -57,10 +59,6 @@ export function sketch() {
     }
 
     // MATERIALI   
-
-    // material = c.material
-    // material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1, wireframe: true }) // versione wireframe
-
     current_material = 'sky';
     dispMap = global.textures[2].texture
     const materials = {
@@ -152,24 +150,32 @@ export function sketch() {
 
     effect = new MarchingCubes(resolution, materials[ current_material ], true, true, 100000) // 100000 numero massimo di poly
     effect.position.set(0, 0, 0)
-    effect.scale.set(50, 50, 50)
+    effect.scale.set(5, 5, 5)
     effect.enableUvs = false
     effect.enableColors = false
     scene.add(effect)
     
+    const points = pointsOnSphere(c.numblobs);
+    Maf_mix = function( x, y, a ) {
+        if( a <= 0 ) return x;
+        if( a >= 1 ) return y;
+        return x + a * (y - x)
+    };
     // this controls content of marching cubes voxel field
-    function updateCubes(object, time, numblobs, dimBlob, sx, sy, sz, floor, wallx, wallz) {
+    function updateCubes( object, time, numblobs, cohesion, strength, subtract, dimBlob, sx, sy, sz, floor, wallx, wallz) {
         object.reset()
         // fill the field with some metaballs
-        const subtract = 12 // a cosa serve?
-        const strength = dimBlob / ((Math.sqrt(numblobs) - 1) / 4 + 1) // dimensione delle sfere (dipende da quanti blob ci sono in scena)
-        // const column = row /2
-
-        for (let i = 0; i < numblobs; i++) {
-            const ballx = 0.5 + (Math.sin(i * time * (Math.cos(i)))) * sx
-            const bally = 0.5 + (Math.abs(Math.cos(i * time * Math.cos(i)))) * sy // dip into the floor
-            const ballz = 0.5 + (Math.cos(i * time * Math.sin((i)))) * sz
-            object.addBall(ballx, bally, ballz, strength, subtract)
+        // fill the field with some metaballs
+        var i, ballx, bally, ballz, subtract, strength;
+        for ( i = 0; i < numblobs; i ++ ) {
+            ballx = .5 + .35 * points[i].x;
+            bally = .5 + .35 * points[i].y;
+            ballz = .5 + .35 * points[i].z
+            const c = .5 + .5 * Math.cos((cohesion+time + i/numblobs)); // const c = .5 + .5 * Math.cos((cohesion+time + i/numblobs) * Maf.TAU);
+            ballx = Maf_mix( .5, ballx, c );
+            bally = Maf_mix( .5, bally, c );
+            ballz = Maf_mix( .5, ballz, c );
+            object.addBall(ballx, bally, ballz, strength, subtract);
         }
         if (floor) object.addPlaneY(2, 12)
         if (wallz) object.addPlaneZ(2, 12)
@@ -177,6 +183,34 @@ export function sketch() {
         object.update()
     }
     
+    function pointsOnSphere(n) {
+
+        const pts = [];
+        const inc = Math.PI * (3 - Math.sqrt(5));
+        const off = 2.0 / n;
+        let r;
+        var phi;
+        let dmin = 10000;
+        const prev = new THREE.Vector3();
+        const cur = new THREE.Vector3();
+    
+        for (var k = 0; k < n; k++){
+            cur.y = k * off - 1 + (off /2);
+            r = Math.sqrt(1 - cur.y * cur.y);
+            phi = k * inc;
+            cur.x = Math.cos(phi) * r;
+            cur.z = Math.sin(phi) * r;
+    
+            const dist = cur.distanceTo( prev );
+            if( dist < dmin ) dmin = dist;
+    
+            pts.push(cur.clone());
+            prev.copy( cur );
+        }
+    
+        return pts;
+    }
+
     // LIGHTS
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
@@ -201,11 +235,6 @@ export function sketch() {
 
         const t = t0 + 0.0001 // performance.now() * 0.0001
 
-        effect.rotation.y += noise3D(0, 0, t + 10) * c.speedRotazione
-        pointLight.position.x = pointLight.position.x + noise3D(0, t, 0) * .002
-        pointLight.position.y = pointLight.position.y + noise3D(t + 4, 0, 0) * .003
-        pointLight.position.z = pointLight.position.z + noise3D(0, 0, t + 8) * .001
-
         // marching cubes
         if (c.resolution !== resolution) {
             resolution = c.resolution;
@@ -214,7 +243,14 @@ export function sketch() {
         if (c.isolation !== effect.isolation) {
             effect.isolation = c.isolation;
         }
-        updateCubes(effect, time, c.numBlobs, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz);
+        const subtract = 12 - 10 * (.5 + .5 * Math.cos( t * 2 * Math.PI)); // 2 * Math.PI ==> Maf.TAU
+        const strength = .5;//.5 / ( ( Math.sqrt( numblobs ) - 1 ) / 4 + 1 );
+
+        updateCubes( effect, t, .5 + .5 * Math.sin( t * 2 * Math.PI ), strength, subtract, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz );
+
+        const tt = easings.InOutQuad(t);
+        effect.rotation.y = .5 * Math.PI;
+        effect.rotation.z = tt * 2 * Math.PI;
         
         renderer.render(scene, camera) // RENDER
         stats.end() // XXX

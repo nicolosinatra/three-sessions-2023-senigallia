@@ -9,7 +9,7 @@ import { PerspectiveCamera } from 'three';
 
 let scene
 let material, current_material
-let reflectionCube, dispMap, diffMap, bumpMap
+let reflectionCube, dispMap
 let effect
 let animation
 let onWindowResize
