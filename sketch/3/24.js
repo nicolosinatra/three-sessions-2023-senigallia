@@ -30,11 +30,11 @@ export function sketch() {
         numBlobs: 40 + Math.random() * 50, 
         resolution: 80, 
         isolation: 120, 
-        wireframe: false,
+        wireframe: true,
         //dummy: function () { }
 
         //materials
-        material: 'sky',
+        material: 'FacesColorAI',
 
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
@@ -56,16 +56,19 @@ export function sketch() {
     // material = c.material
     // material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1, wireframe: true }) // versione wireframe
 
-    current_material = 'sky';
-    dispMap = global.textures[2].texture
+    current_material = c.material;
     const materials = {
         'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
-        'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide}),
+        'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
 		'teatro': new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe } ),
-        'Facce_colori': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.textures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
+        'FacesColor': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[3].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
+        'FacesBk': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[4].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
+        'FacesColorAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[5].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
+        'FacesBkAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[6].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe})
     };
+    /* dispMap = textures[2].texture
     dispMap.wrapS = dispMap.wrapT = THREE.RepeatWrapping
-    dispMap.repeat.set(1, 1)
+    dispMap.repeat.set(1, 1) */
 
     let time = 0
     const clock = new THREE.Clock()

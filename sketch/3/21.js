@@ -57,16 +57,15 @@ export function sketch() {
 
     // MATERIALI   
     current_material = c.material;
-
-    dispMap = global.textures[2].texture
     const materials = {
         'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
         'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide}),
 		'teatro': new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe } ),
-        'Facce_colori': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.textures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
+        'FacesColor': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[3].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide}),
+        'FacesBk': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[4].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide}),
+        'FacesColorAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[5].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide}),
+        'FacesBkAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[6].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe})
     };
-    dispMap.wrapS = dispMap.wrapT = THREE.RepeatWrapping
-    dispMap.repeat.set(1, 1)
 
     let time = 0
     const clock = new THREE.Clock()
