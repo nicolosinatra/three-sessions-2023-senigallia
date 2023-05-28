@@ -1,4 +1,4 @@
-// Column + Cannon
+// Column + Cannon + Bloom
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
