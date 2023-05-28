@@ -29,9 +29,9 @@ export function sketch() {
 
     const p = {
         // start
-        fromSky: true,
+        fromSky: false,
         slowBuild: true,
-        slowBuildDelay: 7, // sec
+        slowBuildDelay: 1, // sec
         pauseAfterBuild: true,
         pauseAfterBuildTime: 20, // sec
         // columns
