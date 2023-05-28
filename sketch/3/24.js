@@ -228,9 +228,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
-    effect?.dispose()
     controls?.dispose()
-    geometry?.dispose()
     gui.destroy()
     material?.dispose()
     reflectionCube?.dispose()
