@@ -141,6 +141,6 @@ export function dispose() {
     controls?.dispose()
     geometry?.dispose()
     material?.dispose()
-    gui?.dispose()
+    gui?.destroy()
     window?.removeEventListener('resize', onWindowResize)
 }
