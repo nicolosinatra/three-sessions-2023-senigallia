@@ -281,7 +281,7 @@ const loadCubeTexture = (name, path, format) => {
 	global.cubeTextures.push({
 		name: name,
 		texture: cubeTextureLoader.load(urls, (cube) => {
-			console.log('loadedCubeTexture' + cube)
+			console.log('loadedCubeTexture: ' + cube)
 		})
 	})
 }
@@ -292,7 +292,7 @@ const loadTexture = (name, path, format) => {
 	global.textures.push({
 		name: name,
 		texture: textureLoader.load(url, (texture) => {
-			console.log('loadedTexture' + texture)
+			console.log('loadedTexture: ' + texture)
 		})
 	})
 }
@@ -311,7 +311,7 @@ loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 4
 // INIT
 const init = () => {
 	window.document.body.style.cursor = 'none'
-	changeSet(2)
+	changeSet(0)
 	// RENDERER
 	global.renderer = new THREE.WebGLRenderer({
 		alpha: true,
