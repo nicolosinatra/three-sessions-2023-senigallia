@@ -31,13 +31,14 @@ export function sketch() {
         rows: 40,
         columns: 40,
         // unit transformation
-        pointMaxWidth: 10,
+        pointMaxWidth: 6,
         pointMinWidth: 2,
         pointMaxY: 40,
+        minDelta: 10,
         pointGroundY: 0,
         // view
         lookAtCenter: new THREE.Vector3(-2.5, 20, -2.5),
-        cameraPosition: new THREE.Vector3(-2.5+140, Math.random()*50+200, Math.random()*80+400),
+        cameraPosition: new THREE.Vector3(-2.5 + 140, Math.random() * 50 + 200, Math.random() * 80 + 400),
         // lookAtCenter: new THREE.Vector3(-unit/2, 0, -unit/2),
         // cameraPosition: new THREE.Vector3(-unit/2, 100*, 0),
         autoRotate: true,
@@ -45,7 +46,7 @@ export function sketch() {
         camera: 35,
         // bloom
         exposure: 0.5,
-        bloomStrength: 1,
+        bloomStrength: 1.5,
         bloomThreshold: .2,
         bloomRadius: .7,
     }
@@ -102,7 +103,7 @@ export function sketch() {
         vertexShader: `attribute float scale;
                        void main() {
                            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-                           gl_PointSize = scale * ( 300.0 / - mvPosition.z );
+                           gl_PointSize = scale * ( 300.0 / - mvPosition.z ); 
                            gl_Position = projectionMatrix * mvPosition;
                        }`,
         fragmentShader: `uniform vec3 color;
@@ -125,55 +126,73 @@ export function sketch() {
     composer.addPass(bloomPass)
 
     // ANIMATE
-    const animate = () => {
+    let last = 0
+    const animate = (now) => {
         if (showStats) stats.begin() // XXX
 
-        // ANIMATION
-        const positions = particles.geometry.attributes.position.array;
-        const scales = particles.geometry.attributes.scale.array;
-        let i = 0, j = 0
-        for (let ix = 0; ix < p.columns; ix++) {
-            for (let iy = 0; iy < p.rows; iy++) {
-                if (p.kind === 'wave') {
-                    positions[i + 1] = (Math.sin((ix + count) * 0.3) * p.pointMaxY) + (Math.sin((iy + count) * 0.5) * p.pointMaxY)
-                    scales[j] = (Math.sin((ix + count) * 0.3) + 1) * p.pointMaxWidth + (Math.sin((iy + count) * 0.5) + 1) * p.pointMaxWidth
-                } else if (p.kind === 'freq1') {
-                    const pointVol = MIC.mapSound(i / 3, numParticles, p.pointGroundY, p.pointMaxY)
-                    if (p.modeY) positions[i + 1] = pointVol
-                    if (p.scaleVol) {
-                        const pointVolScale = MIC.getVol(p.pointMinWidth, p.pointMaxWidth)
-                        scales[j] = pointVolScale
-                    } else {
-                        const pointVolScale = MIC.mapSound(ix, p.columns, p.pointMinWidth, p.pointMaxWidth)
-                        scales[j] = pointVolScale
+        if (!last || now - last >= .1 * 1000) {
+            last = now
+            // ANIMATION
+            const positions = particles.geometry.attributes.position.array;
+            const scales = particles.geometry.attributes.scale.array;
+            let i = 0, j = 0
+            for (let ix = 0; ix < p.columns; ix++) {
+                for (let iy = 0; iy < p.rows; iy++) {
+                    if (p.kind === 'wave') {
+                        positions[i + 1] = (Math.sin((ix + count) * 0.3) * p.pointMaxY) + (Math.sin((iy + count) * 0.5) * p.pointMaxY)
+                        scales[j] = (Math.sin((ix + count) * 0.3) + 1) * p.pointMaxWidth + (Math.sin((iy + count) * 0.5) + 1) * p.pointMaxWidth
+                    } else if (p.kind === 'freq1') {
+                        const pointVol = MIC.mapSound(i / 3, p.columns * p.rows, p.pointGroundY, p.pointMaxY)
+                        if (p.modeY) {
+                            if (pointVol > p.minDelta) {
+                                positions[i + 1] = pointVol
+                                if (p.scaleVol) {
+                                    const pointVolScale = MIC.getVol(p.pointMinWidth, p.pointMaxWidth)
+                                    scales[j] = pointVolScale
+                                } else {
+                                    const pointVolScale = MIC.mapSound(i / 3, p.columns * p.rows, p.pointMinWidth, p.pointMaxWidth)
+                                    scales[j] = pointVolScale
+                                }
+                            } else {
+                                positions[i + 1] = p.pointGroundY
+                                scales[j] = 0
+                            }
+                        }
+                    } else if (p.kind === 'freq2') {
+                        const pointVol = MIC.mapSound(ix, p.columns, p.pointGroundY, p.pointMaxY)
+                        if (p.modeY) {
+                            if (pointVol > p.minDelta) {
+                                positions[i + 1] = pointVol
+                                if (p.scaleVol) {
+                                    const pointVolScale = MIC.getVol(p.pointMinWidth, p.pointMaxWidth)
+                                    scales[j] = pointVolScale
+                                } else {
+                                    const pointVolScale = MIC.mapSound(ix, p.columns, p.pointMinWidth, p.pointMaxWidth)
+                                    scales[j] = pointVolScale
+                                }
+                            } else {
+                                positions[i + 1] = p.pointGroundY
+                                scales[j] = 0
+                            }
+                        }
                     }
-                } else if (p.kind === 'freq2') {
-                    const pointVol = MIC.mapSound(ix, p.columns, p.pointGroundY, p.pointMaxY)
-                    if (p.modeY) positions[i + 1] = pointVol
-                    if (p.scaleVol) {
-                        const pointVolScale = MIC.getVol(p.pointMinWidth, p.pointMaxWidth)
-                        scales[j] = pointVolScale
-                    } else {
-                        const pointVolScale = MIC.mapSound(ix, p.columns, p.pointMinWidth, p.pointMaxWidth)
-                        scales[j] = pointVolScale
-                    }
+                    i += 3
+                    j++
                 }
-                i += 3
-                j++
             }
+            particles.geometry.attributes.position.needsUpdate = true
+            particles.geometry.attributes.scale.needsUpdate = true
+            count += 0.1
         }
-        particles.geometry.attributes.position.needsUpdate = true
-        particles.geometry.attributes.scale.needsUpdate = true
-        count += 0.1
 
         controls.update()
-
         renderer.render(scene, camera) // RENDER
         composer.render() // POST-PROCESSING
         if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
+    animate.timeScale = 1 / 5
     animate()
 }
 
