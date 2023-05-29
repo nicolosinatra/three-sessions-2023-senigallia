@@ -8,7 +8,7 @@ import { PerspectiveCamera } from 'three';
 
 let scene
 let material, current_material
-let reflectionCube, dispMap
+let reflectionCube
 let effect
 let animation
 let onWindowResize
@@ -21,7 +21,7 @@ export function sketch() {
 
     const c = {
         // clouds 
-        dimBlob: 0.2 + Math.floor(Math.random()*0.3),
+        dimBlob: 0.3 + Math.floor(Math.random()*0.5),
         speedRotazione: 0.005, 
         x_effetto:0,
         y_effetto:0,
@@ -35,7 +35,7 @@ export function sketch() {
         speed: 0.01,
         numBlobs: 70 + Math.floor(Math.random() * 90), 
         resolution: 95, 
-        isolation: 150, 
+        isolation: 100, 
         wireframe: false,
         //dummy: function () { }
 
@@ -120,24 +120,21 @@ export function sketch() {
 
         // material
         const createHandler = function ( id ) {
-
             return function () {
                 current_material = id;
                 effect.material = materials[ id ];
+                effect.material.wireframe = c.wireframe
                 // effect.enableUvs = ( current_material === 'textured' ) ? true : false;
 				// effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
             };
-
         };
         const materialFolder = gui.addFolder( 'Materials' );
-
+            materialFolder.add( c, 'wireframe' )
 			for ( const m in materials ) {
 
 				c [ m ] = createHandler( m );
 				materialFolder.add( c, m ).name( m );
 			}
-            materialFolder.add( c, 'wireframe' )
-            console.log(c.wireframe)
 
         // camera
         const cameraFolder = gui.addFolder( 'Camera' )
@@ -234,8 +231,8 @@ export function dispose() {
     controls?.dispose()
     gui.destroy()
     material?.dispose()
+    current_material?.dispose()
     reflectionCube?.dispose()
-    dispMap?.dispose()
     window.removeEventListener('resize', onWindowResize)
     noise3D = null
 }

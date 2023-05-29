@@ -8,7 +8,7 @@ import { PerspectiveCamera } from 'three';
 
 let scene
 let material, current_material
-let reflectionCube, dispMap
+let reflectionCube
 let effect
 let animation
 let onWindowResize
@@ -30,7 +30,7 @@ export function sketch() {
         numBlobs: 40 + Math.random() * 50, 
         resolution: 80, 
         isolation: 120, 
-        wireframe: true,
+        wireframe: false,
         //dummy: function () { }
 
         //materials
@@ -57,7 +57,7 @@ export function sketch() {
     // material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1, wireframe: true }) // versione wireframe
 
     current_material = c.material;
-    const materials = {
+    let materials = {
         'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
         'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
 		'teatro': new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe } ),
@@ -116,25 +116,20 @@ export function sketch() {
 
         // material
         const createHandler = function ( id ) {
-
             return function () {
                 current_material = id;
                 effect.material = materials[ id ];
+                effect.material.wireframe = c.wireframe
                 // effect.enableUvs = ( current_material === 'textured' ) ? true : false;
 				// effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
             };
-
         };
         const materialFolder = gui.addFolder( 'Materials' );
-
+            materialFolder.add( c, 'wireframe' )
 			for ( const m in materials ) {
-
 				c [ m ] = createHandler( m );
 				materialFolder.add( c, m ).name( m );
 			}
-            materialFolder.add( c, 'wireframe' )
-            console.log(c.wireframe)
-
         // camera
         const cameraFolder = gui.addFolder( 'Camera' )
         cameraFolder.add( camera.position , 'x', 0, 1, 0.05 )
@@ -229,8 +224,8 @@ export function dispose() {
     controls?.dispose()
     gui.destroy()
     material?.dispose()
+    current_material?.dispose()
     reflectionCube?.dispose()
-    dispMap?.dispose()
     window.removeEventListener('resize', onWindowResize)
     noise3D = null
 }
