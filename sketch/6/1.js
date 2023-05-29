@@ -58,6 +58,10 @@ export function sketch() {
                          }`
     })
     const shaderScale = material.uniforms.scale.value
+    setTimeout(() => {
+        material.uniforms.uTexture.value = textures[0].texture
+    }, 5000)
+
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
     onWindowResize()
