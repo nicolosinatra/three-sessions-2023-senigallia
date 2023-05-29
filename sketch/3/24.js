@@ -23,9 +23,15 @@ export function sketch() {
         // clouds 
         dimBlob: 0.4 + Math.random(),
         speedRotazione: 0.005, 
-        sx: 0.2,
+        ex:0, // posizione effetto
+        ey:0,
+        ez:0,
+        sx: 0.2, // disposizione sfere
         sy: 0.08,
         sz: 0.2,
+        rx: 0, // rotazione effetto
+        ry: 0,
+        rz: 0,
         speed: 0.02,
         numBlobs: 40 + Math.random() * 50, 
         resolution: 80, 
@@ -61,8 +67,6 @@ export function sketch() {
         'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
         'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
 		'teatro': new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe } ),
-        'FacesColor': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[3].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
-        'FacesBk': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[4].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
         'FacesColorAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[5].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
         'FacesBkAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[6].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
         'FacesColorDetails': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[7].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe})
@@ -106,6 +110,9 @@ export function sketch() {
         simulationFolder.add( c, 'sx', 0.01, 1, 0.01)
         simulationFolder.add( c, 'sy', -1, 1, 0.01)
         simulationFolder.add( c, 'sz', 0.01, 1, 0.01)
+        simulationFolder.add( c, 'rx', -3, Math.PI * 2, 0.05) 
+        simulationFolder.add( c, 'ry', -3, Math.PI * 2, 0.05) 
+        simulationFolder.add( c, 'rz', -3, Math.PI * 2, 0.05) 
         simulationFolder.add( c, 'speed', 0.01, 2, 0.01 )
         simulationFolder.add( c, 'numBlobs', 1, 100, 1 )
         simulationFolder.add( c, 'resolution', 10, 100, 1 )
@@ -195,6 +202,7 @@ export function sketch() {
 
         const t = t0 + 0.0001 // performance.now() * 0.0001
 
+        effect.rotation.set(c.rx, c.ry, c.rz)
         effect.rotation.y += noise3D(0, 0, t + 10) * c.speedRotazione
         pointLight.position.x = pointLight.position.x + noise3D(0, t, 0) * .002
         pointLight.position.y = pointLight.position.y + noise3D(t + 4, 0, 0) * .003

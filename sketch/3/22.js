@@ -1,16 +1,14 @@
-// looper 45 prove
+// clouds at the bottom of the screen
 
 
-import Stats from 'three/addons/libs/stats.module.js' // XXX
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js'
-import { PerspectiveCamera } from 'three'
+import { PerspectiveCamera } from 'three';
 
 let scene
 let material, current_material
 let reflectionCube
-let Maf_mix
 let effect
 let animation
 let onWindowResize
@@ -18,33 +16,35 @@ let noise3D
 let controls
 let gui
 
-
-
 export function sketch() {
     console.log("Sketch launched")
-    const stats = new Stats() // XXX
-    canvas3D.appendChild(stats.dom)
 
     const c = {
         // clouds 
-        dimBlob: 0.4 + Math.random(),
+        dimBlob: 0.5,
         speedRotazione: 0.005, 
-        sx: 0.2,
-        sy: 0.08,
-        sz: 0.2,
+        ex: 0, // posizione effetto
+        ey: -15,
+        ez: 0,
+        sx: 0.2, // disposizione sfere
+        sy: 0.05,
+        sz: 0.1,
+        rx: 0, // rotazione effettp
+        ry: 0,
+        rz: 0,
         speed: 0.02,
-        numBlobs: 10, 
-        resolution: 80, 
-        isolation: 120, 
+        numBlobs: 45 + Math.random() * 5, 
+        resolution: 90, 
+        isolation: 130, 
         wireframe: false,
         //dummy: function () { }
 
         //materials
-        //material: 'sky',
+        material: 'FacesColorAI',
 
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
-        cameraPosition: new THREE.Vector3(10,-10,10),
+        cameraPosition: new THREE.Vector3(0, 5, 30),
         autoRotate: true,
         autoRotateSpeed: -1,
         camera: 35,
@@ -57,8 +57,23 @@ export function sketch() {
         wallz: false,
     }
 
-    // MATERIALE 
-    
+    // MATERIALI   
+
+    // material = c.material
+    // material = new THREE.MeshStandardMaterial({ color: 0xaaaaff, envMap: reflectionCube, roughness: 0, metalness: 1, wireframe: true }) // versione wireframe
+
+    current_material = c.material;
+    let materials = {
+        'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
+        'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
+		'teatro': new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe } ),
+        'FacesColorAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[5].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
+        'FacesBkAI': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[6].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe}),
+        'FacesColorDetails': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[7].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide, wireframe: c.wireframe})
+    };
+    /* dispMap = textures[2].texture
+    dispMap.wrapS = dispMap.wrapT = THREE.RepeatWrapping
+    dispMap.repeat.set(1, 1) */
 
     let time = 0
     const clock = new THREE.Clock()
@@ -95,6 +110,9 @@ export function sketch() {
         simulationFolder.add( c, 'sx', 0.01, 1, 0.01)
         simulationFolder.add( c, 'sy', -1, 1, 0.01)
         simulationFolder.add( c, 'sz', 0.01, 1, 0.01)
+        simulationFolder.add( c, 'rx', -3, Math.PI * 2, 0.05) 
+        simulationFolder.add( c, 'ry', -3, Math.PI * 2, 0.05) 
+        simulationFolder.add( c, 'rz', -3, Math.PI * 2, 0.05) 
         simulationFolder.add( c, 'speed', 0.01, 2, 0.01 )
         simulationFolder.add( c, 'numBlobs', 1, 100, 1 )
         simulationFolder.add( c, 'resolution', 10, 100, 1 )
@@ -105,30 +123,25 @@ export function sketch() {
         simulationFolder.open()
 
         // material
-        // const createHandler = function ( id ) {
-
-        //     return function () {
-        //         current_material = id;
-        //         effect.material = materials[ id ];
-        //         // effect.enableUvs = ( current_material === 'textured' ) ? true : false;
-		// 		// effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
-        //     };
-
-        // };
-        // const materialFolder = gui.addFolder( 'Materials' );
-
-		// 	for ( const m in materials ) {
-
-		// 		c [ m ] = createHandler( m );
-		// 		materialFolder.add( c, m ).name( m );
-		// 	}
-        //     materialFolder.add( c, 'wireframe' )
-        //     console.log(c.wireframe)
-
+        const createHandler = function ( id ) {
+            return function () {
+                current_material = id;
+                effect.material = materials[ id ];
+                effect.material.wireframe = c.wireframe
+                // effect.enableUvs = ( current_material === 'textured' ) ? true : false;
+				// effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
+            };
+        };
+        const materialFolder = gui.addFolder( 'Materials' );
+            materialFolder.add( c, 'wireframe' )
+			for ( const m in materials ) {
+				c [ m ] = createHandler( m );
+				materialFolder.add( c, m ).name( m );
+			}
         // camera
         const cameraFolder = gui.addFolder( 'Camera' )
         cameraFolder.add( camera.position , 'x', 0, 1, 0.05 )
-        cameraFolder.add( camera.position , 'y', -30, 10, 0.05 )
+        cameraFolder.add( camera.position , 'y', -50, 50, 0.05 )
         cameraFolder.add( camera.position , 'z', 20, 150, 0.05 )
         cameraFolder.open()
     }
@@ -136,140 +149,35 @@ export function sketch() {
     // SCENE
     scene = new THREE.Scene()
 
-    function getMaterial() {
-        const material = new THREE.MeshStandardMaterial({color: 0x5186a6, metalness: .1, roughness: .5});
-        material.onBeforeCompile = (shader) =>{
-          shader.vertexShader = shader.vertexShader.replace(
-            `varying vec3 vViewPosition;`,
-            `varying vec3 vViewPosition;
-        varying vec3 pos;
-        varying vec2 vUv;`);
-          shader.vertexShader = shader.vertexShader.replace(
-            `#include <defaultnormal_vertex>`,
-            `#include <defaultnormal_vertex>
-        pos = position;
-        vUv = pos.xy;`);
-      
-         shader.fragmentShader = shader.fragmentShader.replace(
-            `varying vec3 vViewPosition;`,
-            `varying vec3 vViewPosition;
-        varying vec3 pos;
-        varying vec2 vUv;
-      
-        vec3 perturbNormalArb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy ) {
-        vec3 vSigmaX = dFdx( surf_pos );
-        vec3 vSigmaY = dFdy( surf_pos );
-        vec3 vN = surf_norm;    // normalized
-        vec3 R1 = cross( vSigmaY, vN );
-        vec3 R2 = cross( vN, vSigmaX );
-        float fDet = dot( vSigmaX, R1 );
-        vec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );
-        return normalize( abs( fDet ) * surf_norm - vGrad );
-      }
-      
-      #define M_PI 3.1415926535897932384626433832795
-      #define TAU 2.*M_PI
-      
-      float pattern(float v, float v2) {
-        float offset = .4 * (sin(TAU*opacity));
-        return smoothstep( .45 + offset, .55+offset, .5 + .5 * sin( 10. * 2. * M_PI * v + 10. * opacity * 2. * M_PI ) );
-      }
-      `);
-      
-         shader.fragmentShader = shader.fragmentShader.replace(
-            `vec4 diffuseColor = vec4( diffuse, opacity );`,
-            `vec4 diffuseColor = vec4( diffuse, opacity );
-        float r = sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
-        float theta = acos(pos.z/r);
-        float phi = atan(pos.y,pos.x);
-        float strip = pattern(vUv.y, vUv.x);
-        float stripOffset = pattern(vUv.y-.001, vUv.x)-strip;
-        float modifiedRoughness = .2 + .3*strip;
-        diffuseColor.rgb = vec3(.8*strip);`);
-      
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <roughnessmap_fragment>',
-            `#include <roughnessmap_fragment>
-            roughnessFactor = modifiedRoughness;`
-          );
-      
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <normal_fragment>',
-            `#include <normal_fragment>
-            normal = perturbNormalArb( -vViewPosition, normal, vec2( 0., -stripOffset ) );`
-          );
-      
-          shader.fragmentShader = `#extension GL_OES_standard_derivatives : enable
-          ${shader.fragmentShader}`;
-      
-        }
-        return material;
-    }
-
     let resolution = 32; 
 
-    const material = getMaterial();
-    effect = new MarchingCubes(resolution, material, true, true, 100000) // 100000 numero massimo di poly
-    effect.position.set(0, 0, 0)
-    effect.scale.set(5, 5, 5)
+    effect = new MarchingCubes(resolution, materials[ current_material ], true, true, 100000) // 100000 numero massimo di poly
+    effect.position.set(c.ex, c.ey, c.ez)
+    effect.scale.set(50, 50, 50)
     effect.enableUvs = false
     effect.enableColors = false
     scene.add(effect)
     
-    function pointsOnSphere(n) {
-        const pts = [];
-        const inc = Math.PI * (3 - Math.sqrt(5));
-        const off = 2.0 / n;
-        let r;
-        var phi;
-        let dmin = 10000;
-        const prev = new THREE.Vector3();
-        const cur = new THREE.Vector3();
-        for (var k = 0; k < n; k++){
-            cur.y = k * off - 1 + (off /2);
-            r = Math.sqrt(1 - cur.y * cur.y);
-            phi = k * inc;
-            cur.x = Math.cos(phi) * r;
-            cur.z = Math.sin(phi) * r;
-    
-            const dist = cur.distanceTo( prev );
-            if( dist < dmin ) dmin = dist;
-    
-            pts.push(cur.clone());
-            prev.copy( cur );
-        }
-        return pts;
-    }
-
-    const points = pointsOnSphere(c.numblobs);
-    console.log(points)
-    Maf_mix = function( x, y, a ) {
-        if( a <= 0 ) return x;
-        if( a >= 1 ) return y;
-        return x + a * (y - x)
-    };
     // this controls content of marching cubes voxel field
-    function updateCubes( object, time, numblobs, cohesion, strength, subtract, dimBlob, sx, sy, sz, floor, wallx, wallz) {
+    function updateCubes(object, time, numblobs, dimBlob, sx, sy, sz, floor, wallx, wallz) {
         object.reset()
         // fill the field with some metaballs
-        // fill the field with some metaballs
-        var i, ballx, bally, ballz, subtract, strength;
-        for ( i = 0; i < numblobs; i ++ ) {
-            ballx = .5 + .35 * points[i].x;
-            bally = .5 + .35 * points[i].y;
-            ballz = .5 + .35 * points[i].z
-            const c = .5 + .5 * Math.cos((cohesion+time + i/numblobs)); // const c = .5 + .5 * Math.cos((cohesion+time + i/numblobs) * Maf.TAU);
-            ballx = Maf_mix( .5, ballx, c );
-            bally = Maf_mix( .5, bally, c );
-            ballz = Maf_mix( .5, ballz, c );
-            object.addBall(ballx, bally, ballz, strength, subtract);
+        const subtract = 12
+        const strength = dimBlob / ((Math.sqrt(numblobs) - 1) / 4 + 1) // dimensione delle sfere (dipende da quanti blob ci sono in scena)
+        // const column = row /2
+
+        for (let i = 0; i < numblobs; i++) {
+            const ballx = 0.5 + (Math.sin(i * time * (Math.cos(i)))) * sx
+            const bally = 0.5 + (Math.abs(Math.cos(i * time * Math.cos(i)))) * sy // dip into the floor
+            const ballz = 0.5 + (Math.cos(i * time * Math.sin((i)))) * sz
+            object.addBall(ballx, bally, ballz, strength, subtract)
         }
         if (floor) object.addPlaneY(2, 12)
         if (wallz) object.addPlaneZ(2, 12)
         if (wallx) object.addPlaneX(2, 12)
         object.update()
     }
-
+    
     // LIGHTS
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(0.5, 0.5, 1)
@@ -286,13 +194,18 @@ export function sketch() {
 
     // ANIMATE
     const animate = () => {
-        stats.begin() // XXX
+        if (showStats) stats.begin() // XXX
 
         // ANIMATION
         const delta = clock.getDelta();
         time += delta * c.speed * 0.2;
 
         const t = t0 + 0.0001 // performance.now() * 0.0001
+
+        // effect.rotation.y += noise3D(0, 0, t + 10) * c.speedRotazione
+        pointLight.position.x = pointLight.position.x + noise3D(0, t, 0) * .002
+        pointLight.position.y = pointLight.position.y + noise3D(t + 4, 0, 0) * .003
+        pointLight.position.z = pointLight.position.z + noise3D(0, 0, t + 8) * .001
 
         // marching cubes
         if (c.resolution !== resolution) {
@@ -302,17 +215,11 @@ export function sketch() {
         if (c.isolation !== effect.isolation) {
             effect.isolation = c.isolation;
         }
-        const subtract = 12 - 10 * (.5 + .5 * Math.cos( t * 2 * Math.PI)); // 2 * Math.PI ==> Maf.TAU
-        const strength = .5;//.5 / ( ( Math.sqrt( numblobs ) - 1 ) / 4 + 1 );
-
-        updateCubes( effect, t, .5 + .5 * Math.sin( t * 2 * Math.PI ), strength, subtract, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz );
-
-        const tt = easings.InOutQuad(t);
-        effect.rotation.y = .5 * Math.PI;
-        effect.rotation.z = tt * 2 * Math.PI;
+        effect.rotation.set(c.rx, c.ry, c.rz)
+        updateCubes(effect, time, c.numBlobs, c.dimBlob, c.sx, c.sy, c.sz, c.floor, c.wallx, c.wallz);
         
         renderer.render(scene, camera) // RENDER
-        stats.end() // XXX
+        if (showStats) stats.end() // XXX
 
         animation = requestAnimationFrame(animate) // CIAK
     }
