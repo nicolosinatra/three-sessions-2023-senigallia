@@ -24,20 +24,20 @@ export function sketch() {
     const p = {
         // toggle
         kind: 'freq1', // wave, freq1, freq2, ...
-        scaleVol: false,
-        modeY: false,
+        scaleVol: true,
+        modeY: true,
         // grid
-        gridUnit: 10,
-        rows: 1,
-        columns: 3,
+        gridUnit: 20,
+        rows: 5,
+        columns: 14,
         // unit transformation
         pointMaxWidth: 10,
-        pointMinWidth: 2,
+        pointMinWidth: 3,
         pointMaxY: 30,
         pointGroundY: 0,
         // view
-        lookAtCenter: new THREE.Vector3(-5, 10, -5),
-        cameraPosition: new THREE.Vector3(-5, 180, 0),
+        lookAtCenter: new THREE.Vector3(-10, 10, -10),
+        cameraPosition: new THREE.Vector3(-10, 480, 0),
         // lookAtCenter: new THREE.Vector3(-unit/2, 0, -unit/2),
         // cameraPosition: new THREE.Vector3(-unit/2, 100*, 0),
         autoRotate: false,

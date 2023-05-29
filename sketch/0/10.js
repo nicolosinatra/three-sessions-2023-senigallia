@@ -25,27 +25,27 @@ export function sketch() {
         // toggle
         kind: 'freq1', // wave, freq1, freq2, ...
         scaleVol: false,
-        modeY: false,
+        modeY: true,
         // grid
-        gridUnit: 10,
-        rows: 1,
-        columns: 3,
+        gridUnit: 5,
+        rows: 40,
+        columns: 40,
         // unit transformation
         pointMaxWidth: 10,
         pointMinWidth: 2,
-        pointMaxY: 30,
+        pointMaxY: 40,
         pointGroundY: 0,
         // view
-        lookAtCenter: new THREE.Vector3(-5, 10, -5),
-        cameraPosition: new THREE.Vector3(-5, 180, 0),
+        lookAtCenter: new THREE.Vector3(-2.5, 20, -2.5),
+        cameraPosition: new THREE.Vector3(-2.5+140, Math.random()*50+200, Math.random()*80+400),
         // lookAtCenter: new THREE.Vector3(-unit/2, 0, -unit/2),
         // cameraPosition: new THREE.Vector3(-unit/2, 100*, 0),
-        autoRotate: false,
-        autoRotateSpeed: -0.2,
+        autoRotate: true,
+        autoRotateSpeed: - 1 + Math.random() * 2,
         camera: 35,
         // bloom
         exposure: 0.5,
-        bloomStrength: 2,
+        bloomStrength: 1,
         bloomThreshold: .2,
         bloomRadius: .7,
     }

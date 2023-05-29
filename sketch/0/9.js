@@ -25,19 +25,19 @@ export function sketch() {
         // toggle
         kind: 'freq1', // wave, freq1, freq2, ...
         scaleVol: false,
-        modeY: false,
+        modeY: true,
         // grid
-        gridUnit: 10,
-        rows: 1,
-        columns: 3,
+        gridUnit: 5,
+        rows: 10,
+        columns: 40,
         // unit transformation
         pointMaxWidth: 10,
         pointMinWidth: 2,
-        pointMaxY: 30,
+        pointMaxY: 40,
         pointGroundY: 0,
         // view
-        lookAtCenter: new THREE.Vector3(-5, 10, -5),
-        cameraPosition: new THREE.Vector3(-5, 180, 0),
+        lookAtCenter: new THREE.Vector3(-2.5, 60, -2.5),
+        cameraPosition: new THREE.Vector3(-2.5, 0, 280),
         // lookAtCenter: new THREE.Vector3(-unit/2, 0, -unit/2),
         // cameraPosition: new THREE.Vector3(-unit/2, 100*, 0),
         autoRotate: false,

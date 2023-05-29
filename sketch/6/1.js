@@ -1,16 +1,32 @@
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-
 let scene
 let material
 let geometry
 let animation
 let onWindowResize
-let image
+let slideShow
+let images = []
 
 export function sketch() {
     console.log("Sketch launched")
 
-    image = textures[4].texture
+    const loadImage = (path, format) => {
+        const imageLoader = new THREE.TextureLoader()
+        const url = path + format
+        images.push(
+            imageLoader.load(url, (image) => {
+                console.log('loadedImage: ' + image)
+            })
+        )
+    }
+
+    loadImage('https://allyourhtml.club/carousel/lion', '.jpg')
+    loadImage('https://allyourhtml.club/carousel/lion', '.jpg')
+    loadImage('https://allyourhtml.club/carousel/lion', '.jpg')
+    loadImage('https://allyourhtml.club/carousel/lion', '.jpg')
+    loadImage('https://allyourhtml.club/carousel/lion', '.jpg')
+
+
+    const imageDefault = images[0]
     const imageAspect = 1.77
 
     // CAMERA
@@ -40,7 +56,7 @@ export function sketch() {
     material = new THREE.ShaderMaterial({
         uniforms: {
             color: { value: new THREE.Color(0xffffff) },
-            uTexture: { value: image },
+            uTexture: { value: imageDefault },
             scale: { value: new THREE.Vector2(1, 1) }
         },
         vertexShader: `varying vec2 vUv;
@@ -58,6 +74,11 @@ export function sketch() {
                          }`
     })
     const shaderScale = material.uniforms.scale.value
+    slideShow = setInterval(() => {
+        material.uniforms.uTexture.value = images[Math.round(Math.random() * images.length)]
+        console.log('image changed random')
+    }, 2000)
+
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
     onWindowResize()
@@ -79,8 +100,12 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    if (slideShow) clearInterval(slideShow)
     geometry?.dispose()
     material?.dispose()
-    image = null
+    for (let i = 0; i < images.length; i++) {
+        images[i].dispose()
+    }
+    images = null
     window.removeEventListener('resize', onWindowResize)
 }
