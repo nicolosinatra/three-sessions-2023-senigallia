@@ -224,7 +224,6 @@ export function dispose() {
     controls?.dispose()
     gui.destroy()
     material?.dispose()
-    current_material?.dispose()
     reflectionCube?.dispose()
     window.removeEventListener('resize', onWindowResize)
     noise3D = null
