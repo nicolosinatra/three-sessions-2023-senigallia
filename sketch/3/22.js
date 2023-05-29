@@ -9,7 +9,7 @@ import { PerspectiveCamera } from 'three'
 
 let scene
 let material, current_material
-let reflectionCube, dispMap
+let reflectionCube
 let Maf_mix
 let effect
 let animation
@@ -40,7 +40,7 @@ export function sketch() {
         //dummy: function () { }
 
         //materials
-        material: 'sky',
+        //material: 'sky',
 
         // view
         lookAtCenter: new THREE.Vector3(0, 1, 0),
@@ -57,17 +57,8 @@ export function sketch() {
         wallz: false,
     }
 
-    // MATERIALI   
-    current_material = 'sky';
-    dispMap = global.textures[2].texture
-    const materials = {
-        'sky': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
-        'sky_lucido': new THREE.MeshPhysicalMaterial({ color: 0xffffff, envMap: global.cubeTextures[0].texture, reflectivity: 1.0, transmission: 1.0, roughness: 0.0, metalness: 0.2, clearcoat: 0.2, clearcoatRoughness: 0.0, ior: 1.5, thickness: 4, fog: false, side: THREE.DoubleSide}),
-		'teatro': new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: global.cubeTextures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe } ),
-        'Facce_colori': new THREE.MeshStandardMaterial({ color: 0xffffff, envMap: global.textures[2].texture, roughness: 0, metalness: 1, wireframe: c.wireframe }),
-    };
-    dispMap.wrapS = dispMap.wrapT = THREE.RepeatWrapping
-    dispMap.repeat.set(1, 1)
+    // MATERIALE 
+    
 
     let time = 0
     const clock = new THREE.Clock()
@@ -114,25 +105,25 @@ export function sketch() {
         simulationFolder.open()
 
         // material
-        const createHandler = function ( id ) {
+        // const createHandler = function ( id ) {
 
-            return function () {
-                current_material = id;
-                effect.material = materials[ id ];
-                // effect.enableUvs = ( current_material === 'textured' ) ? true : false;
-				// effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
-            };
+        //     return function () {
+        //         current_material = id;
+        //         effect.material = materials[ id ];
+        //         // effect.enableUvs = ( current_material === 'textured' ) ? true : false;
+		// 		// effect.enableColors = ( current_material === 'colors' || current_material === 'multiColors' ) ? true : false;
+        //     };
 
-        };
-        const materialFolder = gui.addFolder( 'Materials' );
+        // };
+        // const materialFolder = gui.addFolder( 'Materials' );
 
-			for ( const m in materials ) {
+		// 	for ( const m in materials ) {
 
-				c [ m ] = createHandler( m );
-				materialFolder.add( c, m ).name( m );
-			}
-            materialFolder.add( c, 'wireframe' )
-            console.log(c.wireframe)
+		// 		c [ m ] = createHandler( m );
+		// 		materialFolder.add( c, m ).name( m );
+		// 	}
+        //     materialFolder.add( c, 'wireframe' )
+        //     console.log(c.wireframe)
 
         // camera
         const cameraFolder = gui.addFolder( 'Camera' )
@@ -145,9 +136,80 @@ export function sketch() {
     // SCENE
     scene = new THREE.Scene()
 
+    function getMaterial() {
+        const material = new THREE.MeshStandardMaterial({color: 0x5186a6, metalness: .1, roughness: .5});
+        material.onBeforeCompile = (shader) =>{
+          shader.vertexShader = shader.vertexShader.replace(
+            `varying vec3 vViewPosition;`,
+            `varying vec3 vViewPosition;
+        varying vec3 pos;
+        varying vec2 vUv;`);
+          shader.vertexShader = shader.vertexShader.replace(
+            `#include <defaultnormal_vertex>`,
+            `#include <defaultnormal_vertex>
+        pos = position;
+        vUv = pos.xy;`);
+      
+         shader.fragmentShader = shader.fragmentShader.replace(
+            `varying vec3 vViewPosition;`,
+            `varying vec3 vViewPosition;
+        varying vec3 pos;
+        varying vec2 vUv;
+      
+        vec3 perturbNormalArb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy ) {
+        vec3 vSigmaX = dFdx( surf_pos );
+        vec3 vSigmaY = dFdy( surf_pos );
+        vec3 vN = surf_norm;    // normalized
+        vec3 R1 = cross( vSigmaY, vN );
+        vec3 R2 = cross( vN, vSigmaX );
+        float fDet = dot( vSigmaX, R1 );
+        vec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );
+        return normalize( abs( fDet ) * surf_norm - vGrad );
+      }
+      
+      #define M_PI 3.1415926535897932384626433832795
+      #define TAU 2.*M_PI
+      
+      float pattern(float v, float v2) {
+        float offset = .4 * (sin(TAU*opacity));
+        return smoothstep( .45 + offset, .55+offset, .5 + .5 * sin( 10. * 2. * M_PI * v + 10. * opacity * 2. * M_PI ) );
+      }
+      `);
+      
+         shader.fragmentShader = shader.fragmentShader.replace(
+            `vec4 diffuseColor = vec4( diffuse, opacity );`,
+            `vec4 diffuseColor = vec4( diffuse, opacity );
+        float r = sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+        float theta = acos(pos.z/r);
+        float phi = atan(pos.y,pos.x);
+        float strip = pattern(vUv.y, vUv.x);
+        float stripOffset = pattern(vUv.y-.001, vUv.x)-strip;
+        float modifiedRoughness = .2 + .3*strip;
+        diffuseColor.rgb = vec3(.8*strip);`);
+      
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <roughnessmap_fragment>',
+            `#include <roughnessmap_fragment>
+            roughnessFactor = modifiedRoughness;`
+          );
+      
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <normal_fragment>',
+            `#include <normal_fragment>
+            normal = perturbNormalArb( -vViewPosition, normal, vec2( 0., -stripOffset ) );`
+          );
+      
+          shader.fragmentShader = `#extension GL_OES_standard_derivatives : enable
+          ${shader.fragmentShader}`;
+      
+        }
+        return material;
+    }
+
     let resolution = 32; 
 
-    effect = new MarchingCubes(resolution, materials[ current_material ], true, true, 100000) // 100000 numero massimo di poly
+    const material = getMaterial();
+    effect = new MarchingCubes(resolution, material, true, true, 100000) // 100000 numero massimo di poly
     effect.position.set(0, 0, 0)
     effect.scale.set(5, 5, 5)
     effect.enableUvs = false
@@ -265,7 +327,6 @@ export function dispose() {
     gui.destroy()
     material?.dispose()
     reflectionCube?.dispose()
-    dispMap?.dispose()
     window.removeEventListener('resize', onWindowResize)
     noise3D = null
 }

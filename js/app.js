@@ -304,7 +304,8 @@ loadCubeTexture('teatro', './assets/textures/cube/teatro/', '.png') // 2
 loadCubeTexture('FacesColor', './assets/textures/cube/FacesColor/', '.jpg') // 3
 loadCubeTexture('FacesBk', './assets/textures/cube/FacesBk/', '.jpg') // 4
 loadCubeTexture('FacesColorAI', './assets/textures/cube/FacesColorAI/', '.png') // 5
-loadCubeTexture('FacesBkAI', './assets/textures/cube/FacesBkAI/', '.png') // 5
+loadCubeTexture('FacesBkAI', './assets/textures/cube/FacesBkAI/', '.png') // 6
+loadCubeTexture('FacesColorDetails', './assets/textures/cube/FacesColorDetails/', '.png') // 7
 // global.textures[n]
 loadTexture('StoneDiff', './assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
 loadTexture('StoneDisp', './assets/textures/stone_tiles_02_disp_4k', '.png') // 1
