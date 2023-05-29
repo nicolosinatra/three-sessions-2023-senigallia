@@ -23,12 +23,12 @@ export function sketch() {
 
     const p = {
         // toggle
-        kind: 'freq1', // wave, freq1, freq2, ...
+        kind: 'freq2', // wave, freq1, freq2, ...
         scaleVol: false,
         modeY: false,
         // grid
         gridUnit: 10,
-        rows: 1,
+        rows: 3,
         columns: 3,
         // unit transformation
         pointMaxWidth: 10,
@@ -37,7 +37,7 @@ export function sketch() {
         pointGroundY: 0,
         // view
         lookAtCenter: new THREE.Vector3(-5, 10, -5),
-        cameraPosition: new THREE.Vector3(-5, 180, 0),
+        cameraPosition: new THREE.Vector3(-5, 200, 0),
         // lookAtCenter: new THREE.Vector3(-unit/2, 0, -unit/2),
         // cameraPosition: new THREE.Vector3(-unit/2, 100*, 0),
         autoRotate: false,

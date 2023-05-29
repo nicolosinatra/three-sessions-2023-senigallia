@@ -306,4 +306,5 @@ export function dispose() {
         window.clearTimeout(id)
     }
     window?.removeEventListener('resize', onWindowResize)
+    //XXX DISPOSE BLOOM
 }
