@@ -77,7 +77,7 @@ const loadSketch = async (sketchName) => {
 	myThree = await import(`../sketch/${sketchName}`)
 	myThree.sketch() // LET'S ROCK
 }
-const map = (value, min1, max1, min2, max2) => {
+global.map = (value, min1, max1, min2, max2) => {
 	const returnvalue = ((value - min1) / (max1 - min1) * (max2 - min2)) + min2
 	return returnvalue
 }
@@ -169,7 +169,7 @@ class mic {
 			return rms
 		}
 		//freq = n * SAMPLE_RATE / MY_FFT_SIZE
-		this.mapFreq = function (i) {
+		global.mapFreq = function (i) {
 			// const freq = i * SAMPLE_RATE / FFT_SIZE;
 			const freq = i * SAMPLE_RATE / self.spectrum.length
 			return freq
@@ -215,7 +215,7 @@ class mic {
 		this.getHighsVol = function (_min, _max) {
 			var min = _min || 0
 			var max = _max || 100
-			var v = map(this.getRMS(this.getMix().highs), 0, self.peak_volume, min, max)
+			var v = global.map(this.getRMS(this.getMix().highs), 0, self.peak_volume, min, max)
 			return v
 		}
 		this.getMidsVol = function (_min, _max) {

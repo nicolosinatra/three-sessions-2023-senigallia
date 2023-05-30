@@ -31,13 +31,14 @@ export function sketch() {
         rows: 3,
         columns: 3,
         // unit transformation
+        micSensitivity: .1,
         pointMaxWidth: 10,
         pointMinWidth: 2,
         pointMaxY: 30,
         pointGroundY: 0,
         // view
-        lookAtCenter: new THREE.Vector3(-5, 10, -5),
-        cameraPosition: new THREE.Vector3(-5, 200, 0),
+        lookAtCenter: new THREE.Vector3(-5, 0, -5),
+        cameraPosition: new THREE.Vector3(-5, 100, 0),
         // lookAtCenter: new THREE.Vector3(-unit/2, 0, -unit/2),
         // cameraPosition: new THREE.Vector3(-unit/2, 100*, 0),
         autoRotate: false,
@@ -80,14 +81,18 @@ export function sketch() {
     scene = new THREE.Scene()
     const numParticles = p.columns * p.rows
     const positions = new Float32Array(numParticles * 3)
+    const positionsYToBe = new Float32Array(numParticles)
+    const scalesToBe = new Float32Array(numParticles)
     const scales = new Float32Array(numParticles)
     let i = 0, j = 0
     for (let ix = 0; ix < p.columns; ix++) {
         for (let iy = 0; iy < p.rows; iy++) {
             positions[i] = ix * p.gridUnit - ((p.columns * p.gridUnit) / 2) // x
             positions[i + 1] = 0 // y
+            positionsYToBe[j] = 0 // y To be
             positions[i + 2] = iy * p.gridUnit - ((p.rows * p.gridUnit) / 2) // z
-            scales[j] = 1;
+            scales[j] = p.pointMinWidth;
+            scalesToBe[j] = p.pointMinWidth // scale to be
             i += 3;
             j++;
         }
@@ -155,7 +160,12 @@ export function sketch() {
                         scales[j] = pointVolScale
                     } else {
                         const pointVolScale = MIC.mapSound(ix, p.columns, p.pointMinWidth, p.pointMaxWidth)
-                        scales[j] = pointVolScale
+                        scalesToBe[j] = pointVolScale
+                        if (scalesToBe[j] > scales[j]) {
+                            scales[j] += p.micSensitivity
+                        } else if (scalesToBe[j] < scales[j]) {
+                            scales[j] -= p.micSensitivity
+                        }
                     }
                 }
                 i += 3
