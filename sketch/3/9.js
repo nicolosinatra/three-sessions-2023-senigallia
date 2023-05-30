@@ -17,24 +17,24 @@ export function sketch() {
 
     const p = {
         // view
-        speed: 0.05,
+        speed: 0.06,
         noiseMode: true,
         noiseFlat: false,
         // spheres
-        spheresNo: 50,
-        spheresSize: .4,
+        spheresNo: 100 + Math.random() * 900,
+        spheresSize: .1,
         spheresDinamicSize: true,
         // view
-        lookAtCenter: new THREE.Vector3(-25, -50, -25),
-        cameraPosition: new THREE.Vector3(0, -25, -100-Math.random()*200),
+        lookAtCenter: new THREE.Vector3(-25, -25, -25),
+        cameraPosition: new THREE.Vector3(0, -25, Math.random() * 75),
         autoRotate: true,
-        autoRotateSpeed: -1,
+        autoRotateSpeed: -2,
         camera: 45,
         // world
         floor: -300,
     }
 
-    let time = 0
+    let time = Math.random() * 100
     const clock = new THREE.Clock()
 
     // CAMERA
@@ -101,7 +101,7 @@ export function sketch() {
     let resolution = effectController.resolution
     effect = new MarchingCubes(resolution, material, true, true, 100000)
     effect.position.set(0, 0, 0)
-    effect.scale.set(120, 100, 100)
+    effect.scale.set(100, 100, 100)
     effect.enableUvs = true
     effect.enableColors = false
     scene.add(effect)
@@ -182,6 +182,7 @@ export function sketch() {
     // ANIMATE
     const animate = () => {
         if (showStats) stats.begin() // XXX
+        controls.update()
 
         // ANIMATION
         const delta = clock.getDelta();
@@ -196,8 +197,6 @@ export function sketch() {
         }
         updateCubes(effect, time, effectController.numBlobs, effectController.floor, effectController.wallx, effectController.wallz);
         // ...
-
-        controls.update()
         renderer.render(scene, camera) // RENDER
         if (showStats) stats.end() // XXX
         animation = requestAnimationFrame(animate) // CIAK

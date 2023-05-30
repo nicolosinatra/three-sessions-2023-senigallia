@@ -17,7 +17,7 @@ export function sketch() {
 
     const p = {
         // view
-        speed: 0.05,
+        speed: 0.01,
         noiseMode: true,
         noiseFlat: false,
         // spheres
@@ -25,10 +25,10 @@ export function sketch() {
         spheresSize: .4,
         spheresDinamicSize: true,
         // view
-        lookAtCenter: new THREE.Vector3(-25, -50, -25),
-        cameraPosition: new THREE.Vector3(0, -25, -100-Math.random()*200),
-        autoRotate: true,
-        autoRotateSpeed: -1,
+        lookAtCenter: new THREE.Vector3(50+Math.random(50), -50, -25),
+        cameraPosition: new THREE.Vector3(0, -50, -100-Math.random()*100),
+        autoRotate: false,
+        autoRotateSpeed: -0.02,
         camera: 45,
         // world
         floor: -300,
@@ -75,7 +75,7 @@ export function sketch() {
     scene.fog = new THREE.Fog(scene.background, 100, 1000)
     material = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        envMap: cubeTextures[1].texture,
+        envMap: cubeTextures[0].texture,
         reflectivity: 0,
         transmission: 1,
         roughness: 0.0,
@@ -101,7 +101,7 @@ export function sketch() {
     let resolution = effectController.resolution
     effect = new MarchingCubes(resolution, material, true, true, 100000)
     effect.position.set(0, 0, 0)
-    effect.scale.set(120, 100, 100)
+    effect.scale.set(100, 100, 100)
     effect.enableUvs = true
     effect.enableColors = false
     scene.add(effect)
@@ -182,6 +182,7 @@ export function sketch() {
     // ANIMATE
     const animate = () => {
         if (showStats) stats.begin() // XXX
+        controls.update()
 
         // ANIMATION
         const delta = clock.getDelta();
@@ -196,8 +197,6 @@ export function sketch() {
         }
         updateCubes(effect, time, effectController.numBlobs, effectController.floor, effectController.wallx, effectController.wallz);
         // ...
-
-        controls.update()
         renderer.render(scene, camera) // RENDER
         if (showStats) stats.end() // XXX
         animation = requestAnimationFrame(animate) // CIAK

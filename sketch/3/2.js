@@ -75,7 +75,7 @@ export function sketch() {
     scene.fog = new THREE.Fog(scene.background, 100, 1000)
     material = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        envMap: cubeTextures[1].texture,
+        envMap: cubeTextures[0].texture,
         reflectivity: 0,
         transmission: 1,
         roughness: 0.0,
