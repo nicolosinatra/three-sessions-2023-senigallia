@@ -71,7 +71,7 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x000000)
+    scene.background = new THREE.Color(0x222222)
     scene.fog = new THREE.Fog(scene.background, 100, 1000)
     material = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
@@ -182,6 +182,7 @@ export function sketch() {
     // ANIMATE
     const animate = () => {
         if (showStats) stats.begin() // XXX
+        if (MIC) controls.autoRotateSpeed = MIC.getHighsVol(-1,+5)
         controls.update()
 
         // ANIMATION
