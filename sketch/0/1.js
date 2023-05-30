@@ -189,6 +189,9 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    composer?.dispose()
+    renderPass?.dispose()
+    bloomPass?.dispose()
     controls.dispose()
     geometry?.dispose()
     material?.dispose()

@@ -306,5 +306,8 @@ export function dispose() {
     while (id--) {
         window.clearTimeout(id)
     }
+    composer?.dispose()
+    renderPass?.dispose()
+    bloomPass?.dispose()
     window?.removeEventListener('resize', onWindowResize)
 }

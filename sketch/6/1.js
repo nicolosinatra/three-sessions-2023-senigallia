@@ -147,5 +147,8 @@ export function dispose() {
         }
         images = []
     }
+    // composer?.dispose()
+    // renderPass?.dispose()
+    // bloomPass?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }

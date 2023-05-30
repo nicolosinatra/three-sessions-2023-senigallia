@@ -204,6 +204,8 @@ export function dispose() {
     controls.dispose()
     geometry?.dispose()
     material?.dispose()
-    //XXX DISPOSE BLOOM
+    composer?.dispose()
+    renderPass?.dispose()
+    bloomPass?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }

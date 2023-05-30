@@ -309,7 +309,8 @@ loadTexture('StoneDiff', './assets/textures/stone_tiles_02_diff_1k', '.jpg') // 
 loadTexture('StoneDisp', './assets/textures/stone_tiles_02_disp_4k', '.png') // 1
 loadTexture('Facce_colori', './assets/textures/Mosaico_facce_colori', '.jpg') // 2
 loadTexture('Facce_bk', './assets/textures/Mosaico_facce_bk', '.jpg') // 3
-loadTexture('Lion', 'https://allyourhtml.club/carousel/lion', '.jpg') // 4
+loadTexture('Cloud', './assets/textures/cloud', '.png') // 4
+loadTexture('Lavatile', './assets/textures/lavatile', '.jpg') // 5
 
 // INIT
 const init = () => {

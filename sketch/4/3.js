@@ -257,5 +257,8 @@ export function dispose() {
     material2?.dispose()
     groundMate?.dispose()
     noise3D = null
+    composer?.dispose()
+    renderPass?.dispose()
+    bloomPass?.dispose()
     window.removeEventListener('resize', onWindowResize)
 }

@@ -27,20 +27,20 @@ export function sketch() {
     const p = {
         // start
         fromSky: false,
-        slowBuild: true,
+        slowBuild: false,
         slowBuildDelay: 1, // sec
         pauseAfterBuild: true,
         pauseAfterBuildTime: 20, // sec
         // columns
-        columnsNo: 8,
-        columnsRadius: 12,// + Math.random() * 2,
+        columnsNo: 14,
+        columnsRadius: 18 + Math.random() * 4,
         piecesNo: 11, // no of pieces per columns
-        piaceMaxSize: 0.9,// + Math.random() * .3, // piece Max radius
+        piaceMaxSize: 0.9 + Math.random() * .3, // piece Max radius
         // view
         lookAtCenter: new THREE.Vector3(Math.random() * -4, 4, Math.random() * 4),
         cameraPosition: new THREE.Vector3(0, 0.5, 0), // < z will be recalculated based on columnRadius/2
         autoRotate: true,
-        autoRotateSpeed: -1 + Math.random() * 2,
+        autoRotateSpeed: -2 + Math.random()*4,
         camera: 75,
         // bloom
         exposure: 0.5,
@@ -279,7 +279,6 @@ export function sketch() {
             }
         }
         // ...
-
         bloomPass.strength = MIC.getHighsVol(1.5, 5)
 
         controls.update()
@@ -311,5 +310,4 @@ export function dispose() {
     renderPass?.dispose()
     bloomPass?.dispose()
     window?.removeEventListener('resize', onWindowResize)
-    //XXX DISPOSE BLOOM
 }

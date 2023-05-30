@@ -27,20 +27,20 @@ export function sketch() {
     const p = {
         // start
         fromSky: false,
-        slowBuild: true,
+        slowBuild: false,
         slowBuildDelay: 1, // sec
         pauseAfterBuild: true,
         pauseAfterBuildTime: 20, // sec
         // columns
         columnsNo: 8,
-        columnsRadius: 12,// + Math.random() * 2,
+        columnsRadius: 12 + Math.random() * 2,
         piecesNo: 11, // no of pieces per columns
-        piaceMaxSize: 0.9,// + Math.random() * .3, // piece Max radius
+        piaceMaxSize: 0.9 + Math.random() * .3, // piece Max radius
         // view
         lookAtCenter: new THREE.Vector3(Math.random() * -4, 4, Math.random() * 4),
         cameraPosition: new THREE.Vector3(0, 0.5, 0), // < z will be recalculated based on columnRadius/2
         autoRotate: true,
-        autoRotateSpeed: -1 + Math.random() * 2,
+        autoRotateSpeed: 2 + Math.random() * 4,
         camera: 75,
         // bloom
         exposure: 0.5,
@@ -51,6 +51,8 @@ export function sketch() {
         gravity: -5.0,
         floor: -1,
     }
+
+    const clock = new THREE.Clock()
 
     // other parameters
     let near = 0.2, far = 1000
@@ -108,19 +110,62 @@ export function sketch() {
             z: p.columnsRadius * Math.sin((2 * Math.PI * i) / p.columnsNo)
         })
     }
+    // lava material
+    const uniforms = {
+        'fogDensity': { value: 0.0045 },
+        'fogColor': { value: new THREE.Vector3(0, 0, 0) },
+        'time': { value: 1.0 },
+        'uvScale': { value: new THREE.Vector2(3.0, 1.0) },
+        'texture1': { value: textures[4].texture },
+        'texture2': { value: textures[5].texture }
+    }
+    uniforms['texture1'].value.wrapS = uniforms['texture1'].value.wrapT = THREE.RepeatWrapping
+    uniforms['texture2'].value.wrapS = uniforms['texture2'].value.wrapT = THREE.RepeatWrapping
+    material = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: `uniform vec2 uvScale;
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uvScale * uv;
+                            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                            gl_Position = projectionMatrix * mvPosition;
+                        }`,
+        fragmentShader: `uniform float time;
+                            uniform float fogDensity;
+                            uniform vec3 fogColor;
+                            uniform sampler2D texture1;
+                            uniform sampler2D texture2;
+                            varying vec2 vUv;
+                            void main( void ) {
+                                vec2 position = - 1.0 + 2.0 * vUv;
+                                vec4 noise = texture2D( texture1, vUv );
+                                vec2 T1 = vUv + vec2( 1.5, - 1.5 ) * time * 0.02;
+                                vec2 T2 = vUv + vec2( - 0.5, 2.0 ) * time * 0.01;
+                                T1.x += noise.x * 2.0;
+                                T1.y += noise.y * 2.0;
+                                T2.x -= noise.y * 0.2;
+                                T2.y += noise.z * 0.2;
+                                float p = texture2D( texture1, T1 * 2.0 ).a;
+                                vec4 color = texture2D( texture2, T2 * 2.0 );
+                                vec4 temp = color * ( vec4( p, p, p, p ) * 2.0 ) + ( color * color - 0.1 );
+                                if( temp.r > 1.0 ) { temp.bg += clamp( temp.r - 2.0, 0.0, 100.0 ); }
+                                if( temp.g > 1.0 ) { temp.rb += temp.g - 1.0; }
+                                if( temp.b > 1.0 ) { temp.rg += temp.b - 1.0; }
+                                gl_FragColor = temp;
+                                float depth = gl_FragCoord.z / gl_FragCoord.w;
+                                const float LOG2 = 1.442695;
+                                float fogFactor = exp2( - fogDensity * fogDensity * depth * depth * LOG2 );
+                                fogFactor = 1.0 - clamp( fogFactor, 0.0, 1.0 );
+                                gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+                            }`
+    })
+    material.uniforms['texture1'].value.wrapS = material.uniforms['texture1'].value.wrapT = THREE.RepeatWrapping
+    material.uniforms['texture2'].value.wrapS = material.uniforms['texture2'].value.wrapT = THREE.RepeatWrapping
+
     // COLUMNSMATERIALS
     const pieceColors = [0xff0000, 0x00ff00, 0xff00ff, 0xffff00, 0x0000ff]
     for (let i = 0; i < pieceColors.length; i++) {
-        pieceMaterials.push(new THREE.MeshStandardMaterial({
-            color: pieceColors[i],
-            roughness: 1,
-            emissive: pieceColors[i],
-            emissiveIntensity: .2,
-            emissiveMap: textures[0].texture,
-            bumpMap: textures[0].texture,
-            bumpScale: .1,
-            fog: true
-        }))
+        pieceMaterials.push(material)
     }
     // COLUMN
     const addPiece = (idCol, col, id, pos, size) => {
@@ -190,7 +235,7 @@ export function sketch() {
     // let's make a ground
     groundGeom = new THREE.PlaneGeometry(20, 20)
     groundMate = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0 })
-    let ground = new THREE.Mesh(groundGeom, groundMate)
+    let ground = new THREE.Mesh(groundGeom, material)
     ground.position.set(0, p.floor, 0)
     ground.rotation.x = - Math.PI / 2
     ground.scale.set(100, 100, 100)
@@ -259,6 +304,8 @@ export function sketch() {
         if (showStats) stats.begin() // XXX
 
         // ANIMATION
+        const delta = clock.getDelta()
+        uniforms['time'].value += 0.7 * delta
         if (!paused) {
             const time = performance.now() / 1000 // seconds
             if (!lastCallTime) {
@@ -279,8 +326,7 @@ export function sketch() {
             }
         }
         // ...
-
-        bloomPass.strength = MIC.getHighsVol(1.5, 5)
+        // bloomPass.strength = MIC.getHighsVol(1.5, 5)
 
         controls.update()
         renderer.render(scene, camera) // RENDER
@@ -311,5 +357,4 @@ export function dispose() {
     renderPass?.dispose()
     bloomPass?.dispose()
     window?.removeEventListener('resize', onWindowResize)
-    //XXX DISPOSE BLOOM
 }
