@@ -278,6 +278,8 @@ export function sketch() {
                 }
             }
         }
+
+        bloomPass.strength = MIC.getHighsVol(1.5, 5)
         // ...
 
         controls.update()

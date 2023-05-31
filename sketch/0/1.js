@@ -31,7 +31,7 @@ export function sketch() {
         rows: 1,
         columns: 1,
         // unit transformation
-        micSensitivity: .1,
+        micSensitivity: .15,
         pointMaxWidth: 10,
         pointMinWidth: 1,
         pointMaxY: 20,
@@ -195,6 +195,5 @@ export function dispose() {
     controls.dispose()
     geometry?.dispose()
     material?.dispose()
-    //XXX DISPOSE BLOOM
     window.removeEventListener('resize', onWindowResize)
 }

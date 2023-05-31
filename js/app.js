@@ -304,6 +304,7 @@ loadCubeTexture('teatro', './assets/textures/cube/teatro/', '.png') // 2
 loadCubeTexture('FacesColorAI', './assets/textures/cube/FacesColorAI/', '.png') // 3
 loadCubeTexture('FacesBkAI', './assets/textures/cube/FacesBkAI/', '.png') // 4
 loadCubeTexture('FacesColorDetails', './assets/textures/cube/FacesColorDetails/', '.png') // 5
+loadCubeTexture('MilkyWay', './assets/textures/cube/NewMilkyWay/dark-s_', '.jpg') // 6
 // global.textures[n]
 loadTexture('StoneDiff', './assets/textures/stone_tiles_02_diff_1k', '.jpg') // 0
 loadTexture('StoneDisp', './assets/textures/stone_tiles_02_disp_4k', '.png') // 1

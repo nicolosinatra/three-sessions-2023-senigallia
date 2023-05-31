@@ -31,7 +31,7 @@ export function sketch() {
         rows: 5,
         columns: 14,
         // unit transformation
-        micSensitivity: .7,
+        micSensitivity: .3,
         pointMaxWidth: 10,
         pointMinWidth: 10,
         pointMaxY: 50,

@@ -27,18 +27,18 @@ export function sketch() {
         scaleVol: false,
         modeY: false,
         // grid
-        gridUnit: 10,
+        gridUnit: 7,
         rows: 1,
         columns: 3,
         // unit transformation
-        micSensitivity: .2,
+        micSensitivity: .15,
         pointMaxWidth: 10,
         pointMinWidth: 1,
         pointMaxY: 30,
         pointGroundY: 0,
         // view
         lookAtCenter: new THREE.Vector3(-5, 0, -5),
-        cameraPosition: new THREE.Vector3(-5, 90, 0),
+        cameraPosition: new THREE.Vector3(-5, 70, 0),
         // lookAtCenter: new THREE.Vector3(-unit/2, 0, -unit/2),
         // cameraPosition: new THREE.Vector3(-unit/2, 100*, 0),
         autoRotate: false,
@@ -200,6 +200,5 @@ export function dispose() {
     controls.dispose()
     geometry?.dispose()
     material?.dispose()
-    //XXX DISPOSE BLOOM
     window.removeEventListener('resize', onWindowResize)
 }

@@ -31,10 +31,10 @@ export function sketch() {
         rows: 10,
         columns: 40,
         // unit transformation
-        micSensitivity: .5,
+        micSensitivity: .2,
         pointMaxWidth: 10,
-        pointMinWidth: 2,
-        pointMaxY: 40,
+        pointMinWidth: 4,
+        pointMaxY: 30,
         pointGroundY: 0,
         // view
         lookAtCenter: new THREE.Vector3(-2.5, 60, -2.6),

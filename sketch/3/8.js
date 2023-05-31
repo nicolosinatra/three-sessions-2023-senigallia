@@ -15,6 +15,8 @@ let noise3D
 export function sketch() {
     console.log("Sketch launched")
 
+    renderer.toneMappingExposure = 2
+
     const p = {
         // view
         speed: 0.06,
@@ -71,11 +73,11 @@ export function sketch() {
 
     // SCENE
     scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x222222)
+    scene.background = new THREE.Color(0x111111)
     scene.fog = new THREE.Fog(scene.background, 100, 1000)
     material = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        envMap: cubeTextures[1].texture,
+        envMap: cubeTextures[6].texture,
         reflectivity: 0,
         transmission: 1,
         roughness: 0.0,
@@ -207,6 +209,7 @@ export function sketch() {
 
 export function dispose() {
     cancelAnimationFrame(animation)
+    renderer.toneMappingExposure = 1.2
     noise3D = null
     groundGeom?.dispose()
     groundMate?.dispose()
