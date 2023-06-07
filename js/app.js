@@ -92,8 +92,9 @@ class mic {
 		let self = this
 		const audioContext = new AudioContext()
 		const SAMPLE_RATE = audioContext.sampleRate
-		window.AudioContext = window.AudioContext || window.webkitAudioContext
-		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
+		window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext
+		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia 
+
 		function startMic(context) {
 			const processSound = (stream) => {
 				console.log("Starting microphone...")
