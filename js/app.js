@@ -61,12 +61,12 @@ const changeSketch = (sketch) => {
 	sketch
 	const loc = current_set + '/' + sketch
 	const sketchName = loc + '.js'
-	if (isSketchValid(`../sketch/${sketchName}`)) { // <<< enable locally to avoid stops on empty sketches
+	// if (isSketchValid(`../sketch/${sketchName}`)) { // <<< enable locally to avoid stops on empty sketches
 		current_sketch = sketch
 		loadSketch(sketchName)
 		console.log('Loading Sketch: ' + sketchName)
 		document.location.hash = loc
-	}
+	// }
 }
 const loadSketch = async (sketchName) => {
 	if (myThree?.dispose()) {
