@@ -22,6 +22,8 @@
 // 6 - ALLUCINATIONS
 // 
 // COMING UP: 
+// - Initial loader
+// - Optional menu 
 // - TouchOSC support
 
 import "./init"
