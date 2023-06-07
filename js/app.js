@@ -31,7 +31,7 @@ import * as THREE from 'three'
 import * as GUI from 'dat.gui'
 import * as CANNON from 'cannon-es'
 import * as NOISE from 'simplex-noise'
-import Stats from 'three/addons/libs/stats.module.js' 
+import Stats from 'three/addons/libs/stats.module.js'
 global.THREE = THREE
 global.GUI = GUI
 global.CANNON = CANNON
@@ -45,6 +45,7 @@ let current_sketch = 0
 let current_set = 0
 let isFullscreen = false
 let showCursor = false
+let areTexturesReady = false
 global.canvas3D = document.getElementById("canvas3D") // global canvas3D
 
 // CHANGE SET & SKETCH
@@ -63,10 +64,10 @@ const changeSketch = (sketch) => {
 	const loc = current_set + '/' + sketch
 	const sketchName = loc + '.js'
 	// if (isSketchValid(`../sketch/${sketchName}`)) { // <<< enable locally to avoid stops on empty sketches
-		current_sketch = sketch
-		loadSketch(sketchName)
-		console.log('Loading Sketch: ' + sketchName)
-		document.location.hash = loc
+	current_sketch = sketch
+	loadSketch(sketchName)
+	console.log('Loading Sketch: ' + sketchName)
+	document.location.hash = loc
 	// }
 }
 const loadSketch = async (sketchName) => {
@@ -95,7 +96,7 @@ class mic {
 		const audioContext = new AudioContext()
 		const SAMPLE_RATE = audioContext.sampleRate
 		window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext
-		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia 
+		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
 
 		function startMic(context) {
 			const processSound = (stream) => {
@@ -242,14 +243,16 @@ const initAudio = () => {
 
 // UI
 const onKeyDown = (event) => {
-	var keyCode = event.keyCode
-	if (keyCode >= 65 && keyCode <= 90)
-		changeSketch(keyCode - 65) // a-z
-	else if (keyCode >= 48 && keyCode <= 57) { // 0-9
-		changeSet(keyCode - 48)
-	} else if (keyCode == 220) toggleMouse() // \
-	else if (keyCode == 117) toggleFullscreen() // F6
-	else if (keyCode == 222) initAudio() // (shift) + ?
+	if (areTexturesReady) {
+		var keyCode = event.keyCode
+		if (keyCode >= 65 && keyCode <= 90)
+			changeSketch(keyCode - 65) // a-z
+		else if (keyCode >= 48 && keyCode <= 57) { // 0-9
+			changeSet(keyCode - 48)
+		} else if (keyCode == 220) toggleMouse() // \
+		else if (keyCode == 117) toggleFullscreen() // F6
+		else if (keyCode == 222) initAudio() // (shift) + ?
+	}
 }
 window.addEventListener('keydown', function (e) {
 	if (typeof onKeyDown == 'function') onKeyDown(e);
@@ -272,6 +275,11 @@ const toggleFullscreen = () => {
 
 // TEXTURES PRELOAD
 THREE.Cache.enabled = true
+THREE.DefaultLoadingManager.onLoad = () => {
+	console.log('Loading Complete!')
+	areTexturesReady = true
+	document.getElementById("loader").style.display = "none"
+}
 global.cubeTextures = []
 const loadCubeTexture = (name, path, format) => {
 	const urls = [
@@ -332,11 +340,7 @@ const init = () => {
 	canvas3D.appendChild(renderer.domElement)
 	if (showStats) {
 		global.stats = new Stats() // XXX
-    	canvas3D.appendChild(stats.dom)
+		canvas3D.appendChild(stats.dom)
 	}
-	// setTimeout(() => {
-	// 	toggleFullscreen();
-	//   }, 5000);
-	// ...
 }
 window.addEventListener('load', init)
