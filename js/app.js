@@ -5,24 +5,23 @@
 // P5-VJ by Salil Parekh https://github.com/burnedsap/p5-vj 
 //
 // HELP:
-// [0-9] changeSet
-// [A-Z] changeSketch
+// [0-9] changeSet (and choose the first [A] sketch] 
+// [A-Z] changeSketch ([A] sketch is always empty/black screen)
 // [\] toggleMouse
 // [F6] toggleFullscreen
+// [?] [shift+?] activate mic audio support
 // [mouse] orbit controls + depends on the sketch (testing)
 // 
 // SCENES:
-// 0 - GRID [status: 1st draft]
-// 1 - SPHERES [status: nd ]
-// 2 - COLUMNS [status: nd]
-// 3 - CLOUDS [status: 1st draft]
-// 4 - LAVA [status: nd]
-// 5 - ...
-// 6 - SOCRATES [status: nd]
-// 7 - IMAGES [status: nd]
+// 0 - GRID 
+// 1 - PLANETS 
+// 2 - TEMPLE
+// 3 - CLOUDS
+// 4 - SKULL
+// 5 - LAVA
+// 6 - ALLUCINATIONS
 // 
 // COMING UP: 
-// - ...
 // - TouchOSC support
 
 import "./init"
@@ -61,12 +60,12 @@ const changeSketch = (sketch) => {
 	sketch
 	const loc = current_set + '/' + sketch
 	const sketchName = loc + '.js'
-	if (isSketchValid(`../sketch/${sketchName}`)) { // <<< enable locally to avoid stops on empty sketches
+	// if (isSketchValid(`../sketch/${sketchName}`)) { // <<< enable locally to avoid stops on empty sketches
 		current_sketch = sketch
 		loadSketch(sketchName)
 		console.log('Loading Sketch: ' + sketchName)
 		document.location.hash = loc
-	}
+	// }
 }
 const loadSketch = async (sketchName) => {
 	if (myThree?.dispose()) {
