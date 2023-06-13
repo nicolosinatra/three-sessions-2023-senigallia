@@ -170,16 +170,16 @@ export function sketch() {
     // const ambientLight = new THREE.AmbientLight(0xffffff)
     // scene.add(ambientLight)
 
-    // let's make a ground
-    groundGeom = new THREE.PlaneGeometry(20, 20)
-    groundMate = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 1 })
-    let ground = new THREE.Mesh(groundGeom, groundMate)
-    ground.position.set(0, p.floor, 0)
-    ground.rotation.x = - Math.PI / 2
-    ground.scale.set(100, 100, 100)
-    ground.castShadow = false
-    ground.receiveShadow = true
-    scene.add(ground)
+    // // let's make a ground
+    // groundGeom = new THREE.PlaneGeometry(20, 20)
+    // groundMate = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 1 })
+    // let ground = new THREE.Mesh(groundGeom, groundMate)
+    // ground.position.set(0, p.floor, 0)
+    // ground.rotation.x = - Math.PI / 2
+    // ground.scale.set(100, 100, 100)
+    // ground.castShadow = false
+    // ground.receiveShadow = true
+    // scene.add(ground)
 
     // ANIMATE
     const animate = () => {
